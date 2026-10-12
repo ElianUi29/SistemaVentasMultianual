@@ -3,10 +3,9 @@ using SistemaVentasMultianual.Data;
 var builder = WebApplication.CreateBuilder(args);
 
 // 1. Inyección de dependencia del servicio de Conexión
-// AddScoped crea una instancia por cada petición HTTP, ideal para servicios de datos
 builder.Services.AddScoped<Conexion>();
 
-// 2. Política CORS para permitir peticiones desde tu frontend (HTML/JS/Live Server)
+// 2. Política CORS totalmente permisiva para GitHub Pages, Ngrok y móviles
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("PermitirFrontend", policy =>
@@ -20,16 +19,16 @@ builder.Services.AddCors(options =>
 // 3. Registrar controladores de la API
 builder.Services.AddControllers();
 
-// (Opcional recomendado) Soporte para Swagger en desarrollo
+// Soporte para Swagger
 builder.Services.AddEndpointsApiExplorer();
 
 var app = builder.Build();
 
-// 4. Activar CORS (debe ir antes de MapControllers y UseAuthorization)
+// 4. Activar la política de CORS de inmediato
 app.UseCors("PermitirFrontend");
 
-// En desarrollo local puedes mantener o comentar UseHttpsRedirection si tu frontend corre en HTTP normal
-app.UseHttpsRedirection();
+// NOTA: Se comenta UseHttpsRedirection para evitar que rompa el túnel HTTP de Ngrok
+// app.UseHttpsRedirection();
 
 app.UseAuthorization();
 

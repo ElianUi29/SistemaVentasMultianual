@@ -1,4 +1,4 @@
-const API_CAJA_URL = 'https://pounce-chive-erratic.ngrok-free.dev';
+const API_AUTH_URL = 'https://pounce-chive-erratic.ngrok-free.dev';
 
 document.addEventListener('DOMContentLoaded', () => {
     // Si ya existe una sesión activa, entra al Dashboard
