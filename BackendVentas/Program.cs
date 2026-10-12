@@ -5,10 +5,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 // 1. Inyección de dependencia de la base de datos y servicios
 builder.Services.AddScoped<Conexion>();
-builder.Services.AddScoped<UsuarioService>(); // Servicio SQL para Auth/Usuarios
-builder.Services.AddScoped<CajaService>();    // Servicio SQL para Caja
+builder.Services.AddScoped<UsuarioService>(); 
+builder.Services.AddScoped<CajaService>();    
+builder.Services.AddScoped<ClienteService>(); // <-- AGREGAR ESTA LÍNEA
 
-// 2. Política CORS permisiva para GitHub Pages, Ngrok y móviles
+// 2. Política CORS permisiva
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("PermitirFrontend", policy =>
@@ -21,17 +22,12 @@ builder.Services.AddCors(options =>
 
 // 3. Registrar controladores de la API
 builder.Services.AddControllers();
-
-// Soporte para endpoints
 builder.Services.AddEndpointsApiExplorer();
 
 var app = builder.Build();
 
 // 4. Activar la política de CORS de inmediato
 app.UseCors("PermitirFrontend");
-
-// Se mantiene comentado para evitar problemas con el túnel HTTP de Ngrok
-// app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
