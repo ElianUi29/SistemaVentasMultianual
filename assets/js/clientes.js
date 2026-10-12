@@ -1,14 +1,21 @@
-const API_CAJA_URL = 'https://pounce-chive-erratic.ngrok-free.dev';
+const API_URL = 'https://pounce-chive-erratic.ngrok-free.dev/api/Clientes';
 
 // 1. Cargar clientes desde SQL Server
 async function cargarClientes() {
     try {
-        // Si tu endpoint en C# no tiene ("listar"), cámbialo a API_URL directo
-        const respuesta = await fetch(`${API_URL}/listar`);
+        const respuesta = await fetch(API_URL, {
+            headers: {
+                'ngrok-skip-browser-warning': 'true'
+            }
+        });
         
         if (!respuesta.ok) {
-            // Intento de fallback si el controlador no usa la subruta /listar
-            const respuestaFallback = await fetch(API_URL);
+            // Intento de fallback si el controlador usa la subruta /listar
+            const respuestaFallback = await fetch(`${API_URL}/listar`, {
+                headers: {
+                    'ngrok-skip-browser-warning': 'true'
+                }
+            });
             if (!respuestaFallback.ok) {
                 throw new Error(`HTTP Error: ${respuesta.status}`);
             }
@@ -37,7 +44,6 @@ function renderizarTablaClientes(clientes) {
     }
 
     clientes.forEach(c => {
-        // Maneja compatibilidad tanto para camelCase como PascalCase
         const documento = c.documento ?? c.Documento ?? '-';
         const nombre = c.nombre ?? c.Nombre ?? '-';
         const telefono = c.telefono ?? c.Telefono ?? '-';
@@ -111,15 +117,29 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                // Si en C# tu POST es directo al root, cambia `${API_URL}/guardar` por API_URL
-                const res = await fetch(`${API_URL}/guardar`, {
+                // Primero intentamos POST directo a la ruta base /api/Clientes
+                let res = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json',
-                        'Accept': 'application/json'
+                        'Accept': 'application/json',
+                        'ngrok-skip-browser-warning': 'true'
                     },
                     body: JSON.stringify(nuevoCliente)
                 });
+
+                // Si da 404, probamos con /guardar por si tu controlador lo define así
+                if (res.status === 404) {
+                    res = await fetch(`${API_URL}/guardar`, {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'ngrok-skip-browser-warning': 'true'
+                        },
+                        body: JSON.stringify(nuevoCliente)
+                    });
+                }
 
                 if (!res.ok) {
                     const errorMsg = await res.text();
