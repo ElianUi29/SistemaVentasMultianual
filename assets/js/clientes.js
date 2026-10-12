@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:5099/api/clientes';
+const API_CAJA_URL = 'https://pounce-chive-erratic.ngrok-free.dev';
 
 // 1. Cargar clientes desde SQL Server
 async function cargarClientes() {

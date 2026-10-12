@@ -1,5 +1,5 @@
-const API_COMPRAS_URL = 'http://localhost:5099/api/compras';
-const API_PROVEEDORES_URL = 'http://localhost:5099/api/proveedores';
+const API_COMPRAS_URL = 'https://pounce-chive-erratic.ngrok-free.dev/api/compras';
+const API_PROVEEDORES_URL = 'https://pounce-chive-erratic.ngrok-free.dev/api/proveedores';
 
 // 1. Cargar las órdenes de compra desde la API
 async function cargarCompras() {

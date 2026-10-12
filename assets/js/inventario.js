@@ -1,4 +1,4 @@
-const API_PRODUCTOS_URL = 'http://localhost:5099/api/productos';
+const API_CAJA_URL = 'https://pounce-chive-erratic.ngrok-free.dev';
 let listaProductosGlobal = [];
 
 // Formateador de moneda en USD

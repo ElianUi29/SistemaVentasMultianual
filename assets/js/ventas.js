@@ -1,5 +1,5 @@
-const API_VENTAS_URL = 'http://localhost:5099/api/ventas';
-const API_CLIENTES_URL = 'http://localhost:5099/api/clientes';
+const API_VENTAS_URL = 'https://pounce-chive-erratic.ngrok-free.dev/api/ventas';
+const API_CLIENTES_URL = 'https://pounce-chive-erratic.ngrok-free.dev/api/clientes';
 
 // 1. Cargar la lista de ventas desde SQL Server
 async function cargarVentas() {

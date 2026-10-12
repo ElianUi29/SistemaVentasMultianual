@@ -1,4 +1,4 @@
-const API_PROVEEDORES_URL = 'http://localhost:5099/api/proveedores';
+const API_CAJA_URL = 'https://pounce-chive-erratic.ngrok-free.dev';
 let listaProveedoresGlobal = [];
 
 // 1. Obtener los proveedores desde la API y renderizarlos
