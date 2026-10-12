@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compras - Sistema de Ventas Multianual</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/dashboard.css">
+  <link rel="stylesheet" href="../assets/css/responsive.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <a href="../index.html" class="sidebar-brand">
+        <i class="fas fa-chart-line" style="color: #38bdf8;"></i>
+        <span>Multi</span>Ventas
+      </a>
+    </div>
+
+    <ul class="sidebar-menu">
+      <li class="menu-category">General</li>
+      <li><a href="../index.html"><i class="fas fa-th-large"></i> Dashboard</a></li>
+      <li><a href="multianual.html"><i class="fas fa-calendar-alt"></i> Multianual 2024-2026</a></li>
+
+      <li class="menu-category">Operaciones</li>
+      <li><a href="ventas.html"><i class="fas fa-shopping-cart"></i> Ventas</a></li>
+      <li><a href="compras.html" class="active"><i class="fas fa-truck-loading"></i> Compras</a></li>
+      <li><a href="inventario.html"><i class="fas fa-boxes"></i> Inventario</a></li>
+      <li><a href="caja.html"><i class="fas fa-cash-register"></i> Control de Caja</a></li>
+
+      <li class="menu-category">Directorio</li>
+      <li><a href="clientes.html"><i class="fas fa-users"></i> Clientes</a></li>
+      <li><a href="proveedores.html"><i class="fas fa-handshake"></i> Proveedores</a></li>
+
+      <li class="menu-category">Análisis y Sistema</li>
+      <li><a href="reportes.html"><i class="fas fa-file-invoice-dollar"></i> Reportes</a></li>
+      <li><a href="usuarios.html"><i class="fas fa-user-shield"></i> Usuarios</a></li>
+      <li><a href="roles.html"><i class="fas fa-user-tag"></i> Roles & Permisos</a></li>
+      <li><a href="configuracion.html"><i class="fas fa-cog"></i> Configuración</a></li>
+    </ul>
+
+    <div class="sidebar-footer">
+      <span>Versión 2.6 Enterprise</span>
+      <a href="../login.html" style="color: #94a3b8;"><i class="fas fa-sign-out-alt"></i></a>
+    </div>
+  </aside>
+
+  <!-- Main Wrapper -->
+  <div class="main-wrapper">
+    <!-- Navbar -->
+    <header class="navbar">
+      <div class="navbar-left">
+        <button class="toggle-sidebar-btn"><i class="fas fa-bars"></i></button>
+        <div class="search-bar">
+          <i class="fas fa-search"></i>
+          <input type="text" placeholder="Buscar clientes, productos...">
+        </div>
+      </div>
+
+      <div class="navbar-right">
+        <a href="#" class="nav-item-icon"><i class="far fa-bell"></i><span class="badge-dot"></span></a>
+        <a href="#" class="nav-item-icon"><i class="far fa-envelope"></i></a>
+        <div class="user-profile">
+          <div class="user-avatar">AD</div>
+          <div class="user-info">
+            <span class="user-name">Administrador</span>
+            <span class="user-role">Super Admin</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <main class="content-body">
+      
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Gestión de Compras</h1>
+          <p class="page-subtitle">Órdenes de compra y abastecimiento de inventario</p>
+        </div>
+        <div>
+          <button id="btnRegistrarOrden" class="btn btn-primary"><i class="fas fa-plus"></i> Registrar Orden</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>OC #</th>
+                <th>Fecha</th>
+                <th>Proveedor</th>
+                <th>Total Costo</th>
+                <th>Estado Recepción</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyCompras">
+              <tr>
+                <td colspan="6" style="text-align:center; padding: 15px; color: #94a3b8;">Cargando compras desde SQL Server...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- MODAL REGISTRAR NUEVA ORDEN DE COMPRA -->
+  <div id="modalCompra" style="display: none; position: fixed; z-index: 9999; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); justify-content: center; align-items: center;">
+    <div style="background: #fff; width: 480px; max-width: 90%; border-radius: 10px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); font-family: inherit;">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e9ecef; padding-bottom: 10px; margin-bottom: 15px;">
+        <h3 style="margin: 0; font-size: 1.25rem; color: #1e293b;">Registrar Orden de Compra</h3>
+        <button type="button" id="btnCerrarModalCompra" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #64748b;">&times;</button>
+      </div>
+
+      <form id="formNuevaCompra">
+        <!-- 1. Campo Proveedor Dinámico -->
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.9rem;">Proveedor (*):</label>
+          <select id="selectProveedorCompra" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 0.9rem;">
+            <option value="">-- Seleccione un Proveedor --</option>
+          </select>
+        </div>
+
+        <!-- 2. N° Orden de Compra (Opcional) -->
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.9rem;">N° Orden de Compra (Opcional):</label>
+          <input type="text" id="inputNroOC" placeholder="Ej: OC-2026-001 (automático si está vacío)" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 0.9rem;">
+        </div>
+
+        <!-- 3. Total Costo -->
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.9rem;">Total Costo ($) (*):</label>
+          <input type="number" step="0.01" id="inputTotalCompra" required placeholder="Ej: 3500.00" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 0.9rem;">
+        </div>
+
+        <!-- 4. Estado de Recepción -->
+        <div style="margin-bottom: 20px;">
+          <label style="display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.9rem;">Estado de Recepción:</label>
+          <select id="selectEstadoCompra" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem;">
+            <option value="Recibido">Recibido</option>
+            <option value="En Tránsito">En Tránsito</option>
+          </select>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="button" id="btnCancelarCompra" style="padding: 10px 18px; border: 1px solid #cbd5e1; background: #fff; border-radius: 6px; cursor: pointer;">Cancelar</button>
+          <button type="submit" style="padding: 10px 20px; background: #0d6efd; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Guardar Orden</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="../assets/js/app.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="../assets/js/compras.js"></script>
+
+</body>
+</html>

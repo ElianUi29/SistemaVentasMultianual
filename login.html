@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acceso al Sistema - Multi Ventas</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #0f172a;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .auth-card {
+      background: #1e293b;
+      width: 420px;
+      max-width: 90%;
+      padding: 35px 30px;
+      border-radius: 12px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+      color: #fff;
+    }
+    .auth-header {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+    .auth-header h2 {
+      margin: 10px 0 5px;
+      font-size: 1.5rem;
+      color: #38bdf8;
+    }
+    .auth-header p {
+      margin: 0;
+      font-size: 0.85rem;
+      color: #94a3b8;
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      color: #cbd5e1;
+      margin-bottom: 6px;
+    }
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      background: #0f172a;
+      color: #fff;
+      box-sizing: border-box;
+      font-size: 0.9rem;
+    }
+    .form-group input:focus, .form-group select:focus {
+      outline: none;
+      border-color: #38bdf8;
+    }
+    .btn-submit {
+      width: 100%;
+      padding: 11px;
+      background: #0284c7;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background 0.2s;
+    }
+    .btn-submit:hover {
+      background: #0369a1;
+    }
+    .toggle-link {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 0.85rem;
+      color: #94a3b8;
+    }
+    .toggle-link a {
+      color: #38bdf8;
+      text-decoration: none;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .toggle-link a:hover {
+      text-decoration: underline;
+    }
+    .alert-msg {
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      font-size: 0.85rem;
+      display: none;
+    }
+    .alert-danger {
+      background: #ef444420;
+      border: 1px solid #ef4444;
+      color: #fca5a5;
+    }
+    .alert-success {
+      background: #22c55e20;
+      border: 1px solid #22c55e;
+      color: #86efac;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="auth-card">
+    
+    <div class="auth-header">
+      <i class="fas fa-chart-line fa-2x" style="color: #38bdf8;"></i>
+      <h2 id="tituloAuth">Iniciar Sesión</h2>
+      <p id="subtituloAuth">Ingresa a tu cuenta de MultiVentas</p>
+    </div>
+
+    <div id="alertaBox" class="alert-msg"></div>
+
+    <!-- 1. FORMULARIO LOGIN -->
+    <form id="formLogin">
+      <div class="form-group">
+        <label>Correo Electrónico:</label>
+        <input type="email" id="loginCorreo" placeholder="admin@sistema.com" required>
+      </div>
+
+      <div class="form-group">
+        <label>Contraseña:</label>
+        <input type="password" id="loginClave" placeholder="••••••••" required>
+      </div>
+
+      <button type="submit" class="btn-submit">Ingresar a la Plataforma</button>
+
+      <div class="toggle-link">
+        ¿No tienes cuenta? <a id="btnIrRegistro">Crear nuevo usuario</a>
+      </div>
+    </form>
+
+    <!-- 2. FORMULARIO REGISTRO (Oculto inicialmente) -->
+    <form id="formRegistro" style="display: none;">
+      <div class="form-group">
+        <label>Nombre Completo (*):</label>
+        <input type="text" id="regNombre" placeholder="Ej: Marlon Vicente" required>
+      </div>
+
+      <div class="form-group">
+        <label>Correo Electrónico (*):</label>
+        <input type="email" id="regCorreo" placeholder="usuario@sistema.com" required>
+      </div>
+
+      <div class="form-group">
+        <label>Contraseña (*):</label>
+        <input type="password" id="regClave" placeholder="••••••••" required>
+      </div>
+
+      <div class="form-group">
+        <label>Rol Inicial:</label>
+        <select id="regRol">
+          <option value="Vendedor">Vendedor</option>
+          <option value="Administrador">Administrador</option>
+        </select>
+      </div>
+
+      <button type="submit" class="btn-submit" style="background: #10b981;">Crear y Guardar Usuario</button>
+
+      <div class="toggle-link">
+        ¿Ya tienes cuenta? <a id="btnIrLogin">Volver a Iniciar Sesión</a>
+      </div>
+    </form>
+
+  </div>
+
+  <script src="assets/js/login.js"></script>
+</body>
+</html>

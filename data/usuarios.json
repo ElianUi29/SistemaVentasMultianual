@@ -1,0 +1,14 @@
+[
+  {
+    "id": 1,
+    "nombre": "Administrador General",
+    "user": "admin@sistema.com",
+    "rol": "SuperAdmin"
+  },
+  {
+    "id": 2,
+    "nombre": "Valeria G\u00f3mez",
+    "user": "valeria.ventas@sistema.com",
+    "rol": "Vendedor"
+  }
+]

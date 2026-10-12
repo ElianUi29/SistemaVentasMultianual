@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Roles y Permisos - Sistema de Ventas Multianual</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/dashboard.css">
+  <link rel="stylesheet" href="../assets/css/responsive.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <a href="../index.html" class="sidebar-brand">
+        <i class="fas fa-chart-line" style="color: #38bdf8;"></i>
+        <span>Multi</span>Ventas
+      </a>
+    </div>
+
+    <ul class="sidebar-menu">
+      <li class="menu-category">General</li>
+      <li><a href="../index.html" class=""><i class="fas fa-th-large"></i> Dashboard</a></li>
+      <li><a href="multianual.html" class=""><i class="fas fa-calendar-alt"></i> Multianual 2024-2026</a></li>
+
+      <li class="menu-category">Operaciones</li>
+      <li><a href="ventas.html" class=""><i class="fas fa-shopping-cart"></i> Ventas</a></li>
+      <li><a href="compras.html" class=""><i class="fas fa-truck-loading"></i> Compras</a></li>
+      <li><a href="inventario.html" class=""><i class="fas fa-boxes"></i> Inventario</a></li>
+      <li><a href="caja.html" class=""><i class="fas fa-cash-register"></i> Control de Caja</a></li>
+
+      <li class="menu-category">Directorio</li>
+      <li><a href="clientes.html" class=""><i class="fas fa-users"></i> Clientes</a></li>
+      <li><a href="proveedores.html" class=""><i class="fas fa-handshake"></i> Proveedores</a></li>
+
+      <li class="menu-category">Análisis y Sistema</li>
+      <li><a href="reportes.html" class=""><i class="fas fa-file-invoice-dollar"></i> Reportes</a></li>
+      <li><a href="usuarios.html" class=""><i class="fas fa-user-shield"></i> Usuarios</a></li>
+      <li><a href="roles.html" class="active"><i class="fas fa-user-tag"></i> Roles & Permisos</a></li>
+      <li><a href="configuracion.html" class=""><i class="fas fa-cog"></i> Configuración</a></li>
+    </ul>
+
+    <div class="sidebar-footer">
+      <span>Versión 2.6 Enterprise</span>
+      <a href="../login.html" style="color: #94a3b8;"><i class="fas fa-sign-out-alt"></i></a>
+    </div>
+  </aside>
+
+  <!-- Main Wrapper -->
+  <div class="main-wrapper">
+    <!-- Navbar -->
+    <header class="navbar">
+      <div class="navbar-left">
+        <button class="toggle-sidebar-btn"><i class="fas fa-bars"></i></button>
+        <div class="search-bar">
+          <i class="fas fa-search"></i>
+          <input type="text" placeholder="Buscar clientes, productos...">
+        </div>
+      </div>
+
+      <div class="navbar-right">
+        <a href="#" class="nav-item-icon"><i class="far fa-bell"></i><span class="badge-dot"></span></a>
+        <a href="#" class="nav-item-icon"><i class="far fa-envelope"></i></a>
+        <div class="user-profile">
+          <div class="user-avatar">AD</div>
+          <div class="user-info">
+            <span class="user-name">Administrador</span>
+            <span class="user-role">Super Admin</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <main class="content-body">
+      
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Roles y Permisos</h1>
+    <p class="page-subtitle">Configuración de perfiles y niveles de autorización</p>
+  </div>
+  <div>
+    <button class="btn btn-primary" onclick="alert('Crear rol...')"><i class="fas fa-plus"></i> Nuevo Rol</button>
+  </div>
+</div>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Perfil / Rol</th>
+          <th>Descripción</th>
+          <th>Usuarios Asociados</th>
+          <th>Nivel de Acceso</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>SuperAdmin</strong></td>
+          <td>Control total de módulos, usuarios, base de datos y configuración</td>
+          <td>1</td>
+          <td><span class="badge badge-danger">Total</span></td>
+          <td><button class="btn btn-secondary" style="padding: 4px 8px;"><i class="fas fa-lock"></i></button></td>
+        </tr>
+        <tr>
+          <td><strong>Vendedor</strong></td>
+          <td>Acceso a facturación, catálogo de productos y clientes</td>
+          <td>5</td>
+          <td><span class="badge badge-info">Operativo</span></td>
+          <td><button class="btn btn-secondary" style="padding: 4px 8px;"><i class="fas fa-edit"></i></button></td>
+        </tr>
+        <tr>
+          <td><strong>Almacenero</strong></td>
+          <td>Gestión de inventario, stock, entradas de mercancía y despachos</td>
+          <td>2</td>
+          <td><span class="badge badge-warning">Almacén</span></td>
+          <td><button class="btn btn-secondary" style="padding: 4px 8px;"><i class="fas fa-edit"></i></button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+    </main>
+  </div>
+
+  <script src="../assets/js/app.js"></script>
+  
+</body>
+</html>

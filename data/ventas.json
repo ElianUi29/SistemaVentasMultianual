@@ -1,0 +1,23 @@
+[
+  {
+    "id": "VNT-2024-001",
+    "anio": 2024,
+    "mes": 1,
+    "total": 12000,
+    "cliente": "Empresa Alfa"
+  },
+  {
+    "id": "VNT-2025-050",
+    "anio": 2025,
+    "mes": 6,
+    "total": 29000,
+    "cliente": "Corporaci\u00f3n Beta"
+  },
+  {
+    "id": "VNT-2026-108",
+    "anio": 2026,
+    "mes": 9,
+    "total": 1450,
+    "cliente": "Tech Solutions SAC"
+  }
+]

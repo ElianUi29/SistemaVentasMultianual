@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control de Caja - Sistema de Ventas Multianual</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/dashboard.css">
+  <link rel="stylesheet" href="../assets/css/responsive.css">
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <a href="../index.html" class="sidebar-brand">
+        <i class="fas fa-chart-line" style="color: #38bdf8;"></i>
+        <span>Multi</span>Ventas
+      </a>
+    </div>
+
+    <ul class="sidebar-menu">
+      <li class="menu-category">General</li>
+      <li><a href="../index.html"><i class="fas fa-th-large"></i> Dashboard</a></li>
+      <li><a href="multianual.html"><i class="fas fa-calendar-alt"></i> Multianual 2024-2026</a></li>
+
+      <li class="menu-category">Operaciones</li>
+      <li><a href="ventas.html"><i class="fas fa-shopping-cart"></i> Ventas</a></li>
+      <li><a href="compras.html"><i class="fas fa-truck-loading"></i> Compras</a></li>
+      <li><a href="inventario.html"><i class="fas fa-boxes"></i> Inventario</a></li>
+      <li><a href="caja.html" class="active"><i class="fas fa-cash-register"></i> Control de Caja</a></li>
+
+      <li class="menu-category">Directorio</li>
+      <li><a href="clientes.html"><i class="fas fa-users"></i> Clientes</a></li>
+      <li><a href="proveedores.html"><i class="fas fa-handshake"></i> Proveedores</a></li>
+
+      <li class="menu-category">Análisis y Sistema</li>
+      <li><a href="reportes.html"><i class="fas fa-file-invoice-dollar"></i> Reportes</a></li>
+      <li><a href="usuarios.html"><i class="fas fa-user-shield"></i> Usuarios</a></li>
+      <li><a href="roles.html"><i class="fas fa-user-tag"></i> Roles & Permisos</a></li>
+      <li><a href="configuracion.html"><i class="fas fa-cog"></i> Configuración</a></li>
+    </ul>
+
+    <div class="sidebar-footer">
+      <span>Versión 2.6 Enterprise</span>
+      <a href="../login.html" style="color: #94a3b8;"><i class="fas fa-sign-out-alt"></i></a>
+    </div>
+  </aside>
+
+  <!-- Main Wrapper -->
+  <div class="main-wrapper">
+    <header class="navbar">
+      <div class="navbar-left">
+        <button class="toggle-sidebar-btn"><i class="fas fa-bars"></i></button>
+        <div class="search-bar">
+          <i class="fas fa-search"></i>
+          <input type="text" placeholder="Buscar clientes, productos...">
+        </div>
+      </div>
+
+      <div class="navbar-right">
+        <a href="#" class="nav-item-icon"><i class="far fa-bell"></i><span class="badge-dot"></span></a>
+        <a href="#" class="nav-item-icon"><i class="far fa-envelope"></i></a>
+        <div class="user-profile">
+          <div class="user-avatar">AD</div>
+          <div class="user-info">
+            <span class="user-name">Administrador</span>
+            <span class="user-role">Super Admin</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content-body">
+      
+      <div class="page-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 25px;">
+        <div>
+          <h1 class="page-title">Control de Caja y Arqueos</h1>
+          <p class="page-subtitle">Monitoreo de flujo de efectivo en tienda, aperturas y cierres diarios</p>
+        </div>
+        <div style="display:flex; gap: 8px;">
+          <button id="btnNuevoIngreso" class="btn" style="background:#0ea5e9; color:#fff; border:none; padding:8px 14px; border-radius:6px; cursor:pointer;"><i class="fas fa-plus-circle"></i> + Ingreso</button>
+          <button id="btnNuevoGasto" class="btn" style="background:#f59e0b; color:#fff; border:none; padding:8px 14px; border-radius:6px; cursor:pointer;"><i class="fas fa-minus-circle"></i> - Egreso / Gasto</button>
+          <button id="btnAperturaCaja" class="btn btn-success" style="padding:8px 14px; border-radius:6px; cursor:pointer;"><i class="fas fa-lock-open"></i> Apertura</button>
+          <button id="btnCorteCaja" class="btn btn-danger" style="padding:8px 14px; border-radius:6px; cursor:pointer;"><i class="fas fa-lock"></i> Corte de Caja</button>
+        </div>
+      </div>
+
+      <!-- Tarjetas KPI -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-info">
+            <h4>Saldo Inicial (Hoy)</h4>
+            <div class="kpi-val" id="valSaldoInicial">$0.00</div>
+          </div>
+          <div class="kpi-icon icon-blue"><i class="fas fa-wallet"></i></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-info">
+            <h4>Ingresos Efectivo</h4>
+            <div class="kpi-val" id="valIngresos">$0.00</div>
+          </div>
+          <div class="kpi-icon icon-green"><i class="fas fa-cash-register"></i></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-info">
+            <h4>Egresos / Gastos</h4>
+            <div class="kpi-val" id="valEgresos">$0.00</div>
+          </div>
+          <div class="kpi-icon icon-amber"><i class="fas fa-receipt"></i></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-info">
+            <h4>Efectivo en Caja</h4>
+            <div class="kpi-val" id="valTotalEfectivo">$0.00</div>
+          </div>
+          <div class="kpi-icon icon-purple"><i class="fas fa-coins"></i></div>
+        </div>
+      </div>
+
+      <!-- Tabla de Movimientos de Caja -->
+      <div style="background:#fff; border-radius:10px; padding:20px; margin-top:25px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+        <h3 style="margin-top:0; margin-bottom:15px; font-size:1.15rem; color:#1e293b;">
+          <i class="fas fa-list-alt" style="color:#0ea5e9;"></i> Detalle de Movimientos de la Caja Actual
+        </h3>
+        <table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.95rem;">
+          <thead>
+            <tr style="border-bottom:2px solid #e2e8f0; color:#64748b;">
+              <th style="padding:10px;">ID</th>
+              <th style="padding:10px;">Fecha / Hora</th>
+              <th style="padding:10px;">Tipo</th>
+              <th style="padding:10px;">Concepto</th>
+              <th style="padding:10px; text-align:right;">Monto</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyMovimientos">
+            <tr>
+              <td colspan="5" style="text-align:center; padding:15px; color:#94a3b8;">Cargando movimientos...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="../assets/js/app.js"></script>
+  <script src="../assets/js/caja.js"></script>
+</body>
+</html>

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Sistema de Ventas Multianual</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/dashboard.css">
+  <link rel="stylesheet" href="assets/css/responsive.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <a href="index.html" class="sidebar-brand">
+        <i class="fas fa-chart-line" style="color: #38bdf8;"></i>
+        <span>Multi</span>Ventas
+      </a>
+    </div>
+
+    <ul class="sidebar-menu">
+      <li class="menu-category">General</li>
+      <li><a href="index.html" class="active"><i class="fas fa-th-large"></i> Dashboard</a></li>
+      <li><a href="pages/multianual.html" class=""><i class="fas fa-calendar-alt"></i> Multianual 2024-2026</a></li>
+
+      <li class="menu-category">Operaciones</li>
+      <li><a href="pages/ventas.html" class=""><i class="fas fa-shopping-cart"></i> Ventas</a></li>
+      <li><a href="pages/compras.html" class=""><i class="fas fa-truck-loading"></i> Compras</a></li>
+      <li><a href="pages/inventario.html" class=""><i class="fas fa-boxes"></i> Inventario</a></li>
+      <li><a href="pages/caja.html" class=""><i class="fas fa-cash-register"></i> Control de Caja</a></li>
+
+      <li class="menu-category">Directorio</li>
+      <li><a href="pages/clientes.html" class=""><i class="fas fa-users"></i> Clientes</a></li>
+      <li><a href="pages/proveedores.html" class=""><i class="fas fa-handshake"></i> Proveedores</a></li>
+
+      <li class="menu-category">Análisis y Sistema</li>
+      <li><a href="pages/reportes.html" class=""><i class="fas fa-file-invoice-dollar"></i> Reportes</a></li>
+      <li><a href="pages/usuarios.html" class=""><i class="fas fa-user-shield"></i> Usuarios</a></li>
+      <li><a href="pages/roles.html" class=""><i class="fas fa-user-tag"></i> Roles & Permisos</a></li>
+      <li><a href="pages/configuracion.html" class=""><i class="fas fa-cog"></i> Configuración</a></li>
+    </ul>
+
+    <div class="sidebar-footer">
+      <span>Versión 2.6 Enterprise</span>
+      <a href="login.html" style="color: #94a3b8;"><i class="fas fa-sign-out-alt"></i></a>
+    </div>
+  </aside>
+
+  <!-- Main Wrapper -->
+  <div class="main-wrapper">
+    <!-- Navbar -->
+    <header class="navbar">
+      <div class="navbar-left">
+        <button class="toggle-sidebar-btn"><i class="fas fa-bars"></i></button>
+        <div class="search-bar">
+          <i class="fas fa-search"></i>
+          <input type="text" placeholder="Buscar clientes, productos...">
+        </div>
+      </div>
+
+      <div class="navbar-right">
+        <a href="#" class="nav-item-icon"><i class="far fa-bell"></i><span class="badge-dot"></span></a>
+        <a href="#" class="nav-item-icon"><i class="far fa-envelope"></i></a>
+        <div class="user-profile">
+          <div class="user-avatar">AD</div>
+          <div class="user-info">
+            <span class="user-name">Administrador</span>
+            <span class="user-role">Super Admin</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <main class="content-body">
+      
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Dashboard General</h1>
+    <p class="page-subtitle">Panorama en tiempo real de ingresos, operaciones y metas anuales</p>
+  </div>
+  <div>
+    <button class="btn btn-secondary" onclick="location.reload()"><i class="fas fa-sync-alt"></i> Actualizar</button>
+    <a href="pages/multianual.html" class="btn btn-primary"><i class="fas fa-chart-line"></i> Comparativo Multianual</a>
+  </div>
+</div>
+
+<!-- KPIs -->
+<div class="kpi-grid">
+  <div class="kpi-card">
+    <div class="kpi-info">
+      <h4>Ventas Totales (2026 YTD)</h4>
+      <div class="kpi-val">$488,250</div>
+      <div class="kpi-growth up"><i class="fas fa-arrow-up"></i> +24.8% vs 2025</div>
+    </div>
+    <div class="kpi-icon icon-blue"><i class="fas fa-dollar-sign"></i></div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-info">
+      <h4>Transacciones Totales</h4>
+      <div class="kpi-val">1,842</div>
+      <div class="kpi-growth up"><i class="fas fa-arrow-up"></i> +12.3% mensual</div>
+    </div>
+    <div class="kpi-icon icon-green"><i class="fas fa-shopping-bag"></i></div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-info">
+      <h4>Clientes Nuevos</h4>
+      <div class="kpi-val">328</div>
+      <div class="kpi-growth up"><i class="fas fa-arrow-up"></i> +18.2% este año</div>
+    </div>
+    <div class="kpi-icon icon-purple"><i class="fas fa-user-plus"></i></div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-info">
+      <h4>Stock Crítico</h4>
+      <div class="kpi-val">7 Items</div>
+      <div class="kpi-growth down"><i class="fas fa-exclamation-triangle"></i> Requiere orden</div>
+    </div>
+    <div class="kpi-icon icon-amber"><i class="fas fa-boxes"></i></div>
+  </div>
+</div>
+
+<!-- Charts Row -->
+<div class="charts-grid">
+  <div class="card chart-card">
+    <div class="card-title">
+      <span><i class="fas fa-chart-area" style="color: var(--primary);"></i> Evolución de Ventas 2024 - 2026</span>
+      <span class="badge badge-info">Multi-año</span>
+    </div>
+    <div style="position: relative; height: 290px;">
+      <canvas id="ventasChart"></canvas>
+    </div>
+  </div>
+
+  <div class="card chart-card">
+    <div class="card-title">
+      <span><i class="fas fa-chart-pie" style="color: var(--warning);"></i> Ventas por Categoría</span>
+      <span class="badge badge-success">Actualizado</span>
+    </div>
+    <div style="position: relative; height: 290px;">
+      <canvas id="categoriasChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Recent Transactions Table -->
+<div class="card">
+  <div class="card-title">
+    <span><i class="fas fa-history"></i> Últimas Ventas Realizadas</span>
+    <a href="pages/ventas.html" class="btn btn-secondary" style="font-size: 0.8rem; padding: 4px 10px;">Ver Todas</a>
+  </div>
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Fecha</th>
+          <th>Cliente</th>
+          <th>Total</th>
+          <th>Método de Pago</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="tablaVentasBody">
+        <!-- Rendered via JS -->
+      </tbody>
+    </table>
+  </div>
+</div>
+
+    </main>
+  </div>
+
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/dashboard.js"></script><script src="assets/js/ventas.js"></script>
+</body>
+</html>

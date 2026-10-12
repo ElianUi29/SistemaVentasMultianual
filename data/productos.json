@@ -1,0 +1,20 @@
+[
+  {
+    "codigo": "PRD-001",
+    "nombre": "Laptop Gamer Legion 5",
+    "precio": 1299.0,
+    "stock": 18
+  },
+  {
+    "codigo": "PRD-002",
+    "nombre": "Monitor Ultrawide 34 144Hz",
+    "precio": 480.0,
+    "stock": 12
+  },
+  {
+    "codigo": "PRD-003",
+    "nombre": "Teclado Mec\u00e1nico RGB Pro",
+    "precio": 95.0,
+    "stock": 45
+  }
+]

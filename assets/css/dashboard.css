@@ -1,0 +1,170 @@
+/* ==========================================================================
+   ASSETS/CSS/DASHBOARD.CSS
+   Estilos, variables visuales del Dashboard y Gráficas
+   ========================================================================== */
+
+:root {
+  /* Paleta de colores para gráficos y métricas */
+  --chart-color-2024: #94a3b8;
+  --chart-bg-2024: rgba(148, 163, 184, 0.1);
+
+  --chart-color-2025: #3b82f6;
+  --chart-bg-2025: rgba(59, 130, 246, 0.1);
+
+  --chart-color-2026: #10b981;
+  --chart-bg-2026: rgba(16, 185, 129, 0.1);
+
+  --chart-cat-elec: #2563eb;
+  --chart-cat-pcs: #38bdf8;
+  --chart-cat-acc: #10b981;
+  --chart-cat-soft: #f59e0b;
+  --chart-cat-serv: #8b5cf6;
+
+  --chart-grid-line: #f1f5f9;
+}
+
+/* --------------------------------------------------------------------------
+   KPIs y Métricas
+   -------------------------------------------------------------------------- */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.kpi-card {
+  background: var(--surface, #ffffff);
+  border-radius: var(--radius, 10px);
+  border: 1px solid var(--border, #e2e8f0);
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: var(--shadow, 0 1px 3px rgba(0, 0, 0, 0.05));
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.08));
+}
+
+.kpi-info h4 {
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  color: var(--text-muted, #64748b);
+  letter-spacing: 0.5px;
+  margin: 0 0 0.35rem 0;
+}
+
+.kpi-info .kpi-val {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--dark, #0f172a);
+  line-height: 1.2;
+}
+
+.kpi-growth {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-top: 0.25rem;
+}
+
+.kpi-growth.up { color: var(--success, #16a34a); }
+.kpi-growth.down { color: var(--danger, #dc2626); }
+
+.kpi-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+
+.icon-blue   { background: #dbeafe; color: #2563eb; }
+.icon-green  { background: #dcfce7; color: #16a34a; }
+.icon-amber  { background: #fef3c7; color: #d97706; }
+.icon-purple { background: #f3e8ff; color: #9333ea; }
+
+/* --------------------------------------------------------------------------
+   Contenedores de Gráficos (Chart.js)
+   -------------------------------------------------------------------------- */
+.charts-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.card.chart-card {
+  background: var(--surface, #ffffff);
+  border-radius: var(--radius, 10px);
+  border: 1px solid var(--border, #e2e8f0);
+  padding: 1.25rem 1.5rem;
+  box-shadow: var(--shadow, 0 1px 3px rgba(0, 0, 0, 0.05));
+  display: flex;
+  flex-direction: column;
+}
+
+.card-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--dark, #1e293b);
+}
+
+/* Reemplaza el style="height: 290px" inline de HTML */
+.chart-container-box {
+  position: relative;
+  height: 290px;
+  width: 100%;
+}
+
+/* --------------------------------------------------------------------------
+   Tarjetas Multianuales (2024 - 2026)
+   -------------------------------------------------------------------------- */
+.multianual-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.year-card {
+  background: var(--surface, #ffffff);
+  border-radius: var(--radius, 10px);
+  border: 1px solid var(--border, #e2e8f0);
+  border-left: 4px solid var(--primary, #0284c7);
+  padding: 1.25rem;
+  box-shadow: var(--shadow, 0 1px 3px rgba(0, 0, 0, 0.05));
+}
+
+.year-card.y2024 { border-left-color: #64748b; }
+.year-card.y2025 { border-left-color: #3b82f6; }
+.year-card.y2026 { border-left-color: #10b981; }
+
+/* --------------------------------------------------------------------------
+   Responsive
+   -------------------------------------------------------------------------- */
+@media (max-width: 992px) {
+  .charts-grid,
+  .multianual-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 576px) {
+  .kpi-grid {
+    grid-template-columns: 1fr;
+  }
+}

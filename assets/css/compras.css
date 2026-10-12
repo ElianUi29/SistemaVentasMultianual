@@ -1,0 +1,176 @@
+/* ==========================================================================
+   ESTILOS DEL MÓDULO DE COMPRAS Y REPORTES
+   ========================================================================== */
+
+/* Estados de la tabla */
+.table-msg-error {
+  text-align: center;
+  color: var(--danger, #dc2626);
+  padding: 15px;
+}
+
+.table-msg-empty {
+  text-align: center;
+  padding: 15px;
+  color: var(--text-muted, #64748b);
+}
+
+/* Insignias (Badges) de Estado */
+.badge-status {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: inline-block;
+}
+
+.badge-status.recibido {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+
+.badge-status.pendiente {
+  background-color: #fef3c7;
+  color: #b45309;
+}
+
+/* Control del Modal */
+.modal-compra {
+  display: none;
+}
+
+.modal-compra.active {
+  display: flex;
+}
+
+/* --------------------------------------------------------------------------
+   Plantilla para Exportación PDF
+   -------------------------------------------------------------------------- */
+.pdf-container {
+  padding: 30px;
+  font-family: Arial, sans-serif;
+  color: #333333;
+  background-color: #ffffff;
+}
+
+.pdf-header {
+  border-bottom: 2px solid #0d6efd;
+  padding-bottom: 15px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pdf-empresa h2 {
+  margin: 0;
+  color: #0d6efd;
+}
+
+.pdf-empresa p {
+  margin: 3px 0;
+  font-size: 13px;
+}
+
+.pdf-box-oc {
+  text-align: right;
+  border: 2px solid #333333;
+  padding: 10px 18px;
+  border-radius: 6px;
+}
+
+.pdf-box-oc h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.pdf-box-oc p {
+  margin: 4px 0;
+  font-weight: bold;
+  color: #dc3545;
+  font-size: 15px;
+}
+
+.pdf-card-datos {
+  background: #f8f9fa;
+  border-radius: 6px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.pdf-card-datos h4 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: #495057;
+}
+
+.pdf-table-datos {
+  width: 100%;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.pdf-col-20 { width: 20%; }
+.pdf-col-15 { width: 15%; }
+
+.pdf-table-items {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+  font-size: 13px;
+}
+
+.pdf-table-items th {
+  background-color: #0d6efd;
+  color: #ffffff;
+  padding: 10px;
+  border: 1px solid #dee2e6;
+}
+
+.pdf-table-items td {
+  padding: 12px 10px;
+  border: 1px solid #dee2e6;
+}
+
+.pdf-th-item { text-align: left; }
+.pdf-th-qty { text-align: center; width: 15%; }
+.pdf-th-total { text-align: right; width: 20%; }
+.pdf-td-center { text-align: center; }
+.pdf-td-right { text-align: right; }
+
+.pdf-total-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 40px;
+}
+
+.pdf-table-total {
+  width: 40%;
+  font-size: 14px;
+}
+
+.pdf-row-total {
+  border-top: 2px solid #333333;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.pdf-total-val {
+  padding: 8px 0;
+  text-align: right;
+  color: #0d6efd;
+}
+
+.pdf-firmas-container {
+  margin-top: 60px;
+  display: flex;
+  justify-content: space-around;
+  text-align: center;
+  font-size: 12px;
+}
+
+.pdf-firma-box {
+  width: 200px;
+  border-top: 1px solid #666666;
+  padding-top: 5px;
+}

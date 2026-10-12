@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Directorio de Proveedores - Sistema de Ventas Multianual</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/dashboard.css">
+  <link rel="stylesheet" href="../assets/css/responsive.css">
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <a href="../index.html" class="sidebar-brand">
+        <i class="fas fa-chart-line" style="color: #38bdf8;"></i>
+        <span>Multi</span>Ventas
+      </a>
+    </div>
+
+    <ul class="sidebar-menu">
+      <li class="menu-category">General</li>
+      <li><a href="../index.html"><i class="fas fa-th-large"></i> Dashboard</a></li>
+      <li><a href="multianual.html"><i class="fas fa-calendar-alt"></i> Multianual 2024-2026</a></li>
+
+      <li class="menu-category">Operaciones</li>
+      <li><a href="ventas.html"><i class="fas fa-shopping-cart"></i> Ventas</a></li>
+      <li><a href="compras.html"><i class="fas fa-truck-loading"></i> Compras</a></li>
+      <li><a href="inventario.html"><i class="fas fa-boxes"></i> Inventario</a></li>
+      <li><a href="caja.html"><i class="fas fa-cash-register"></i> Control de Caja</a></li>
+
+      <li class="menu-category">Directorio</li>
+      <li><a href="clientes.html"><i class="fas fa-users"></i> Clientes</a></li>
+      <li><a href="proveedores.html" class="active"><i class="fas fa-handshake"></i> Proveedores</a></li>
+
+      <li class="menu-category">Análisis y Sistema</li>
+      <li><a href="reportes.html"><i class="fas fa-file-invoice-dollar"></i> Reportes</a></li>
+      <li><a href="usuarios.html"><i class="fas fa-user-shield"></i> Usuarios</a></li>
+      <li><a href="roles.html"><i class="fas fa-user-tag"></i> Roles & Permisos</a></li>
+      <li><a href="configuracion.html"><i class="fas fa-cog"></i> Configuración</a></li>
+    </ul>
+
+    <div class="sidebar-footer">
+      <span>Versión 2.6 Enterprise</span>
+      <a href="../login.html" style="color: #94a3b8;"><i class="fas fa-sign-out-alt"></i></a>
+    </div>
+  </aside>
+
+  <!-- Main Wrapper -->
+  <div class="main-wrapper">
+    <header class="navbar">
+      <div class="navbar-left">
+        <button class="toggle-sidebar-btn"><i class="fas fa-bars"></i></button>
+        <div class="search-bar">
+          <i class="fas fa-search"></i>
+          <input type="text" id="filtroProveedor" placeholder="Filtrar por RUC o Razón Social...">
+        </div>
+      </div>
+
+      <div class="navbar-right">
+        <a href="#" class="nav-item-icon"><i class="far fa-bell"></i><span class="badge-dot"></span></a>
+        <a href="#" class="nav-item-icon"><i class="far fa-envelope"></i></a>
+        <div class="user-profile">
+          <div class="user-avatar">AD</div>
+          <div class="user-info">
+            <span class="user-name">Administrador</span>
+            <span class="user-role">Super Admin</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content-body">
+      
+      <div class="page-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 25px;">
+        <div>
+          <h1 class="page-title">Directorio de Proveedores</h1>
+          <p class="page-subtitle">Gestión de abastecimiento, empresas y contactos comerciales</p>
+        </div>
+        <div>
+          <button id="btnNuevoProveedor" class="btn btn-primary" style="background:#0d6efd; color:#fff; border:none; padding:10px 18px; border-radius:6px; cursor:pointer; font-weight:600;">
+            <i class="fas fa-plus"></i> Registrar Proveedor
+          </button>
+        </div>
+      </div>
+
+      <!-- Tabla de Proveedores -->
+      <div style="background:#fff; border-radius:10px; padding:20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+        <table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.95rem;">
+          <thead>
+            <tr style="border-bottom:2px solid #e2e8f0; color:#64748b;">
+              <th style="padding:12px 10px;">ID</th>
+              <th style="padding:12px 10px;">RUC / Documento</th>
+              <th style="padding:12px 10px;">Razón Social</th>
+              <th style="padding:12px 10px;">Teléfono</th>
+              <th style="padding:12px 10px;">Dirección</th>
+              <th style="padding:12px 10px;">Estado</th>
+              <th style="padding:12px 10px; text-align:center;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyProveedores">
+            <tr>
+              <td colspan="7" style="text-align:center; padding:20px; color:#94a3b8;">Cargando proveedores desde SQL Server...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- MODAL REGISTRO DE PROVEEDOR -->
+  <div id="modalProveedor" style="display: none; position: fixed; z-index: 9999; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); justify-content: center; align-items: center;">
+    <div style="background: #fff; width: 480px; max-width: 90%; border-radius: 10px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e9ecef; padding-bottom: 10px; margin-bottom: 15px;">
+        <h3 style="margin: 0; font-size: 1.2rem; color: #1e293b;">Registrar Proveedor</h3>
+        <button type="button" id="btnCerrarModalProv" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #64748b;">&times;</button>
+      </div>
+
+      <form id="formNuevoProveedor">
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.9rem;">RUC / Documento (*):</label>
+          <input type="text" id="provDoc" required placeholder="Ej: 20123456789" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 0.9rem;">
+        </div>
+
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.9rem;">Razón Social / Nombre Comercial (*):</label>
+          <input type="text" id="provRazon" required placeholder="Ej: Aceros y Materiales Huancayo S.A.C." style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 0.9rem;">
+        </div>
+
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.9rem;">Teléfono de Contacto:</label>
+          <input type="text" id="provTel" placeholder="Ej: 987654321" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 0.9rem;">
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <label style="display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.9rem;">Dirección Fiscal:</label>
+          <input type="text" id="provDir" placeholder="Ej: Av. Ferrocarril 1024, Huancayo" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 0.9rem;">
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="button" id="btnCancelarProv" style="padding: 10px 18px; border: 1px solid #cbd5e1; background: #fff; border-radius: 6px; cursor: pointer;">Cancelar</button>
+          <button type="submit" style="padding: 10px 20px; background: #0d6efd; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Guardar Proveedor</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="../assets/js/app.js"></script>
+  <script src="../assets/js/proveedores.js"></script>
+</body>
+</html>
