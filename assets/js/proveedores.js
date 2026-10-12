@@ -1,4 +1,7 @@
-const API_CAJA_URL = 'https://pounce-chive-erratic.ngrok-free.dev';
+// Variable global para evitar colisiones y errores de ámbito
+window.API_PROVEEDORES_URL = window.API_PROVEEDORES_URL || 'https://pounce-chive-erratic.ngrok-free.dev/api/Proveedores';
+var API_PROVEEDORES_URL = window.API_PROVEEDORES_URL;
+
 let listaProveedoresGlobal = [];
 
 // 1. Obtener los proveedores desde la API y renderizarlos
@@ -7,14 +10,30 @@ async function cargarProveedores() {
     if (!tbody) return;
 
     try {
-        const respuesta = await fetch(`${API_PROVEEDORES_URL}/listar`);
+        let respuesta = await fetch(`${API_PROVEEDORES_URL}/listar`, {
+            headers: {
+                'Accept': 'application/json',
+                'ngrok-skip-browser-warning': 'true'
+            }
+        });
+
+        // Fallback si el controlador atiende en la raíz /api/Proveedores
+        if (respuesta.status === 404) {
+            respuesta = await fetch(API_PROVEEDORES_URL, {
+                headers: {
+                    'Accept': 'application/json',
+                    'ngrok-skip-browser-warning': 'true'
+                }
+            });
+        }
+
         if (!respuesta.ok) throw new Error(`HTTP Error: ${respuesta.status}`);
 
         listaProveedoresGlobal = await respuesta.json();
         renderizarTablaProveedores(listaProveedoresGlobal);
     } catch (error) {
         console.error('Error al cargar proveedores:', error);
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:red; padding:15px;">Error al cargar proveedores de la base de datos.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#ef4444; padding:15px;">Error al cargar proveedores de la base de datos.</td></tr>`;
     }
 }
 
@@ -32,8 +51,8 @@ function renderizarTablaProveedores(proveedores) {
 
     proveedores.forEach(p => {
         const id = p.idProveedor || p.IdProveedor;
-        const doc = p.documento || p.Documento;
-        const razon = p.razonSocial || p.RazonSocial;
+        const doc = p.documento || p.Documento || p.ruc || p.Ruc || '-';
+        const razon = p.razonSocial || p.RazonSocial || p.nombre || p.Nombre || '-';
         const tel = p.telefono || p.Telefono || '-';
         const dir = p.direccion || p.Direccion || '-';
 
@@ -56,12 +75,27 @@ function renderizarTablaProveedores(proveedores) {
     });
 }
 
-// 3. Eliminar proveedor (baja lógica)
+// 3. Eliminar proveedor (baja lógica o física)
 window.eliminarProveedor = async function(id, razon) {
     if (!confirm(`¿Estás seguro de eliminar al proveedor "${razon}"?`)) return;
 
     try {
-        const res = await fetch(`${API_PROVEEDORES_URL}/eliminar/${id}`, { method: 'DELETE' });
+        let res = await fetch(`${API_PROVEEDORES_URL}/eliminar/${id}`, { 
+            method: 'DELETE',
+            headers: {
+                'ngrok-skip-browser-warning': 'true'
+            }
+        });
+
+        if (res.status === 404) {
+            res = await fetch(`${API_PROVEEDORES_URL}/${id}`, { 
+                method: 'DELETE',
+                headers: {
+                    'ngrok-skip-browser-warning': 'true'
+                }
+            });
+        }
+
         if (!res.ok) throw new Error(await res.text());
 
         alert('Proveedor eliminado correctamente.');
@@ -83,7 +117,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const inputFiltro = document.getElementById('filtroProveedor');
 
     const abrir = () => { if (modal) modal.style.display = 'flex'; };
-    const cerrar = () => { if (modal) modal.style.display = 'none'; };
+    const cerrar = () => { 
+        if (modal) modal.style.display = 'none'; 
+        if (form) form.reset();
+    };
 
     if (btnNuevo) btnNuevo.addEventListener('click', abrir);
     if (btnCerrar) btnCerrar.addEventListener('click', cerrar);
@@ -95,13 +132,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Filtrador en vivo por RUC o Razón Social
+    // Filtrador en vivo por Documento/RUC o Razón Social
     if (inputFiltro) {
         inputFiltro.addEventListener('input', (e) => {
             const termino = e.target.value.toLowerCase().trim();
             const filtrados = listaProveedoresGlobal.filter(p => {
-                const doc = (p.documento || p.Documento || '').toLowerCase();
-                const razon = (p.razonSocial || p.RazonSocial || '').toLowerCase();
+                const doc = (p.documento || p.Documento || p.ruc || p.Ruc || '').toLowerCase();
+                const razon = (p.razonSocial || p.RazonSocial || p.nombre || p.Nombre || '').toLowerCase();
                 return doc.includes(termino) || razon.includes(termino);
             });
             renderizarTablaProveedores(filtrados);
@@ -125,22 +162,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const nuevoProv = {
                 documento: doc,
+                Documento: doc,
                 razonSocial: razon,
+                RazonSocial: razon,
                 telefono: tel,
-                direccion: dir
+                Telefono: tel,
+                direccion: dir,
+                Direccion: dir
             };
 
             try {
-                const res = await fetch(`${API_PROVEEDORES_URL}/guardar`, {
+                let res = await fetch(`${API_PROVEEDORES_URL}/guardar`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'ngrok-skip-browser-warning': 'true'
+                    },
                     body: JSON.stringify(nuevoProv)
                 });
+
+                if (res.status === 404) {
+                    res = await fetch(API_PROVEEDORES_URL, {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'ngrok-skip-browser-warning': 'true'
+                        },
+                        body: JSON.stringify(nuevoProv)
+                    });
+                }
 
                 if (!res.ok) throw new Error(await res.text());
 
                 alert('¡Proveedor registrado exitosamente en SQL Server!');
-                form.reset();
                 cerrar();
                 cargarProveedores();
             } catch (err) {
