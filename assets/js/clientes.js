@@ -1,4 +1,6 @@
-const API_URL = 'https://pounce-chive-erratic.ngrok-free.dev/api/Clientes';
+// Variable global para evitar errores de 'not defined'
+window.API_URL = 'https://pounce-chive-erratic.ngrok-free.dev/api/Clientes';
+var API_URL = window.API_URL;
 
 // 1. Cargar clientes desde SQL Server
 async function cargarClientes() {
@@ -104,21 +106,32 @@ document.addEventListener('DOMContentLoaded', () => {
             const inputTel = document.getElementById('nuevoTelefono');
             const inputDir = document.getElementById('nuevaDireccion');
 
-            const nuevoCliente = {
-                documento: inputDoc ? inputDoc.value.trim() : '',
-                nombre: inputNombre ? inputNombre.value.trim() : '',
-                telefono: inputTel ? inputTel.value.trim() : '',
-                direccion: inputDir ? inputDir.value.trim() : ''
-            };
+            const docVal = inputDoc ? inputDoc.value.trim() : '';
+            const nomVal = inputNombre ? inputNombre.value.trim() : '';
+            const telVal = inputTel ? inputTel.value.trim() : '';
+            const dirVal = inputDir ? inputDir.value.trim() : '';
 
-            if (!nuevoCliente.documento || !nuevoCliente.nombre) {
+            if (!docVal || !nomVal) {
                 alert('El documento y el nombre son obligatorios.');
                 return;
             }
 
+            // Enviamos con ambos formatos de claves para compatibilidad total con C#
+            const nuevoCliente = {
+                documento: docVal,
+                nombre: nomVal,
+                telefono: telVal,
+                direccion: dirVal,
+                Documento: docVal,
+                Nombre: nomVal,
+                Telefono: telVal,
+                Direccion: dirVal
+            };
+
+            const urlEndpoint = window.API_URL || API_URL;
+
             try {
-                // Primero intentamos POST directo a la ruta base /api/Clientes
-                let res = await fetch(API_URL, {
+                let res = await fetch(urlEndpoint, {
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json',
@@ -128,9 +141,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     body: JSON.stringify(nuevoCliente)
                 });
 
-                // Si da 404, probamos con /guardar por si tu controlador lo define así
                 if (res.status === 404) {
-                    res = await fetch(`${API_URL}/guardar`, {
+                    res = await fetch(`${urlEndpoint}/guardar`, {
                         method: 'POST',
                         headers: { 
                             'Content-Type': 'application/json',
@@ -149,7 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('¡Cliente guardado correctamente en SQL Server!');
                 form.reset();
                 if (modal) modal.style.display = 'none';
-                cargarClientes(); // Recargar la tabla
+                cargarClientes();
             } catch (err) {
                 console.error('Error al guardar cliente:', err);
                 alert(`Error al guardar: ${err.message}`);
