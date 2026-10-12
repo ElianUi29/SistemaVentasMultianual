@@ -1,4 +1,5 @@
 const API_AUTH_URL = 'https://pounce-chive-erratic.ngrok-free.dev/api/Auth';
+
 document.addEventListener('DOMContentLoaded', () => {
     // Si ya existe una sesión activa, entra al Dashboard
     if (localStorage.getItem('usuarioSesion')) {
@@ -66,7 +67,10 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const res = await fetch(`${API_AUTH_URL}/login`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'ngrok-skip-browser-warning': 'true'
+                    },
                     body: JSON.stringify({ correo, clave })
                 });
 
@@ -118,7 +122,10 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const res = await fetch(`${API_AUTH_URL}/registro`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'ngrok-skip-browser-warning': 'true'
+                    },
                     body: JSON.stringify(nuevoUsuario)
                 });
 
