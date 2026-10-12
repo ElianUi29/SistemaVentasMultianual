@@ -1,4 +1,8 @@
-const API_CAJA_URL = 'https://pounce-chive-erratic.ngrok-free.dev';
+// Variable global para evitar errores de scope y colisiones
+window.API_PRODUCTOS_URL = window.API_PRODUCTOS_URL || 'https://pounce-chive-erratic.ngrok-free.dev/api/Productos';
+var API_PRODUCTOS_URL = window.API_PRODUCTOS_URL;
+var API_URL = window.API_PRODUCTOS_URL;
+
 let listaProductosGlobal = [];
 
 // Formateador de moneda en USD
@@ -15,7 +19,23 @@ async function cargarProductos() {
     if (!tbody) return;
 
     try {
-        const res = await fetch(`${API_PRODUCTOS_URL}/listar`);
+        let res = await fetch(`${API_PRODUCTOS_URL}/listar`, {
+            headers: {
+                'Accept': 'application/json',
+                'ngrok-skip-browser-warning': 'true'
+            }
+        });
+
+        // Fallback si el controlador no usa /listar y responde directo en la raíz
+        if (res.status === 404) {
+            res = await fetch(API_PRODUCTOS_URL, {
+                headers: {
+                    'Accept': 'application/json',
+                    'ngrok-skip-browser-warning': 'true'
+                }
+            });
+        }
+
         if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
 
         listaProductosGlobal = await res.json();
@@ -40,11 +60,11 @@ function renderizarTablaProductos(productos) {
 
     productos.forEach(p => {
         const id = p.idProducto || p.IdProducto;
-        const codigo = p.codigo || p.Codigo;
-        const nombre = p.nombre || p.Nombre;
+        const codigo = p.codigo || p.Codigo || `PROD-${id}`;
+        const nombre = p.nombre || p.Nombre || '-';
         const categoria = p.categoria || p.Categoria || 'General';
         const precio = formatoUSD(p.precio || p.Precio);
-        const stock = parseInt(p.stock !== undefined ? p.stock : p.Stock);
+        const stock = parseInt(p.stock !== undefined ? p.stock : (p.Stock !== undefined ? p.Stock : 0));
 
         const esBajoStock = stock <= 5;
         const badgeColor = esBajoStock ? 'background:#fef3c7; color:#b45309;' : 'background:#dcfce7; color:#15803d;';
@@ -78,16 +98,21 @@ function renderizarTablaProductos(productos) {
 // 3. Preparar edición
 window.prepararEditarProducto = async function(id) {
     try {
-        const res = await fetch(`${API_PRODUCTOS_URL}/${id}`);
+        const res = await fetch(`${API_PRODUCTOS_URL}/${id}`, {
+            headers: {
+                'Accept': 'application/json',
+                'ngrok-skip-browser-warning': 'true'
+            }
+        });
         if (!res.ok) throw new Error('No se pudo obtener el producto.');
         const p = await res.json();
 
         document.getElementById('modalProductoTitulo').textContent = 'Editar Producto';
-        document.getElementById('prodId').value = p.idProducto;
-        document.getElementById('prodNombre').value = p.nombre;
-        document.getElementById('prodCategoria').value = p.categoria;
-        document.getElementById('prodPrecio').value = p.precio;
-        document.getElementById('prodStock').value = p.stock;
+        document.getElementById('prodId').value = p.idProducto || p.IdProducto;
+        document.getElementById('prodNombre').value = p.nombre || p.Nombre;
+        document.getElementById('prodCategoria').value = p.categoria || p.Categoria;
+        document.getElementById('prodPrecio').value = p.precio || p.Precio;
+        document.getElementById('prodStock').value = p.stock !== undefined ? p.stock : p.Stock;
 
         abrirModal();
     } catch (err) {
@@ -100,7 +125,22 @@ window.eliminarProducto = async function(id, nombre) {
     if (!confirm(`¿Estás seguro de eliminar el producto "${nombre}" de la base de datos?`)) return;
 
     try {
-        const res = await fetch(`${API_PRODUCTOS_URL}/eliminar/${id}`, { method: 'DELETE' });
+        let res = await fetch(`${API_PRODUCTOS_URL}/eliminar/${id}`, { 
+            method: 'DELETE',
+            headers: {
+                'ngrok-skip-browser-warning': 'true'
+            }
+        });
+
+        if (res.status === 404) {
+            res = await fetch(`${API_PRODUCTOS_URL}/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'ngrok-skip-browser-warning': 'true'
+                }
+            });
+        }
+
         if (!res.ok) throw new Error(await res.text());
 
         alert('Producto eliminado exitosamente.');
@@ -163,7 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const id = parseInt(document.getElementById('prodId').value);
+            const id = parseInt(document.getElementById('prodId').value) || 0;
             const nombre = document.getElementById('prodNombre').value.trim();
             const categoria = document.getElementById('prodCategoria').value;
             const precio = parseFloat(document.getElementById('prodPrecio').value);
@@ -176,22 +216,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const data = {
                 idProducto: id,
+                IdProducto: id,
                 nombre: nombre,
+                Nombre: nombre,
                 categoria: categoria,
+                Categoria: categoria,
                 precio: precio,
-                stock: stock
+                Precio: precio,
+                stock: stock,
+                Stock: stock
             };
 
             const esEdicion = id > 0;
-            const url = esEdicion ? `${API_PRODUCTOS_URL}/actualizar/${id}` : `${API_PRODUCTOS_URL}/guardar`;
-            const metodo = esEdicion ? 'PUT' : 'POST';
+            let url = esEdicion ? `${API_PRODUCTOS_URL}/actualizar/${id}` : `${API_PRODUCTOS_URL}/guardar`;
+            let metodo = esEdicion ? 'PUT' : 'POST';
 
             try {
-                const res = await fetch(url, {
+                let res = await fetch(url, {
                     method: metodo,
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'ngrok-skip-browser-warning': 'true'
+                    },
                     body: JSON.stringify(data)
                 });
+
+                // Fallback de ruta directa si el backend usa /api/Productos/{id} o /api/Productos
+                if (res.status === 404) {
+                    const urlFallback = esEdicion ? `${API_PRODUCTOS_URL}/${id}` : API_PRODUCTOS_URL;
+                    res = await fetch(urlFallback, {
+                        method: metodo,
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'ngrok-skip-browser-warning': 'true'
+                        },
+                        body: JSON.stringify(data)
+                    });
+                }
 
                 if (!res.ok) throw new Error(await res.text());
 
