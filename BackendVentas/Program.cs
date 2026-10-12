@@ -7,7 +7,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddScoped<UsuarioService>(); 
 builder.Services.AddScoped<CajaService>();    
 builder.Services.AddScoped<ClienteService>(); 
-builder.Services.AddScoped<CompraService>(); // <-- Agregar esta línea
+builder.Services.AddScoped<CompraService>();  
+builder.Services.AddScoped<ProductoService>(); // <-- AGREGAR ESTA LÍNEA
 // 2. Política CORS permisiva
 builder.Services.AddCors(options =>
 {

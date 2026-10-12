@@ -1,70 +1,33 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
-using SistemaVentasMultianual.Data;
+using BackendVentas.Models;
+using BackendVentas.Services;
 
 namespace BackendVentas.Controllers
 {
-    public class ProductoModel
-    {
-        public int IdProducto { get; set; }
-        public string Codigo { get; set; } = string.Empty;
-        public string Nombre { get; set; } = string.Empty;
-        public string Categoria { get; set; } = string.Empty;
-        public decimal Precio { get; set; }
-        public int Stock { get; set; }
-        public string Estado { get; set; } = "Disponible";
-    }
-
     [ApiController]
     [Route("api/[controller]")]
     public class ProductosController : ControllerBase
     {
-        private readonly Conexion _conexion;
+        private readonly ProductoService _productoService;
 
-        public ProductosController(Conexion conexion)
+        public ProductosController(ProductoService productoService)
         {
-            _conexion = conexion;
+            _productoService = productoService;
         }
 
         // 1. Listar inventario
         [HttpGet("listar")]
+        [HttpGet]
         public async Task<IActionResult> ListarProductos()
         {
-            var lista = new List<ProductoModel>();
             try
             {
-                using (var con = _conexion.ObtenerConexion())
-                {
-                    await con.OpenAsync();
-                    var query = @"
-                        SELECT IdProducto, Codigo, Nombre, Categoria, Precio, Stock, Estado 
-                        FROM Productos 
-                        ORDER BY IdProducto ASC";
-
-                    using (var cmd = new SqlCommand(query, con))
-                    using (var reader = await cmd.ExecuteReaderAsync())
-                    {
-                        while (await reader.ReadAsync())
-                        {
-                            int stock = Convert.ToInt32(reader["Stock"]);
-                            lista.Add(new ProductoModel
-                            {
-                                IdProducto = Convert.ToInt32(reader["IdProducto"]),
-                                Codigo = reader["Codigo"].ToString() ?? "",
-                                Nombre = reader["Nombre"].ToString() ?? "",
-                                Categoria = reader["Categoria"].ToString() ?? "",
-                                Precio = Convert.ToDecimal(reader["Precio"]),
-                                Stock = stock,
-                                Estado = stock <= 5 ? "Bajo Stock" : "Disponible"
-                            });
-                        }
-                    }
-                }
+                var lista = await _productoService.ListarProductosAsync();
                 return Ok(lista);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al listar productos: {ex.Message}");
+                return StatusCode(500, new { mensaje = $"Error al listar productos: {ex.Message}" });
             }
         }
 
@@ -74,158 +37,78 @@ namespace BackendVentas.Controllers
         {
             try
             {
-                using (var con = _conexion.ObtenerConexion())
-                {
-                    await con.OpenAsync();
-                    var query = "SELECT IdProducto, Codigo, Nombre, Categoria, Precio, Stock, Estado FROM Productos WHERE IdProducto = @id";
-                    using (var cmd = new SqlCommand(query, con))
-                    {
-                        cmd.Parameters.AddWithValue("@id", id);
-                        using (var reader = await cmd.ExecuteReaderAsync())
-                        {
-                            if (await reader.ReadAsync())
-                            {
-                                return Ok(new ProductoModel
-                                {
-                                    IdProducto = Convert.ToInt32(reader["IdProducto"]),
-                                    Codigo = reader["Codigo"].ToString() ?? "",
-                                    Nombre = reader["Nombre"].ToString() ?? "",
-                                    Categoria = reader["Categoria"].ToString() ?? "",
-                                    Precio = Convert.ToDecimal(reader["Precio"]),
-                                    Stock = Convert.ToInt32(reader["Stock"]),
-                                    Estado = reader["Estado"].ToString() ?? "Disponible"
-                                });
-                            }
-                        }
-                    }
-                }
-                return NotFound("Producto no encontrado.");
+                var producto = await _productoService.ObtenerProductoAsync(id);
+                if (producto == null)
+                    return NotFound(new { mensaje = "Producto no encontrado." });
+
+                return Ok(producto);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { mensaje = ex.Message });
             }
         }
 
         // 3. Registrar nuevo producto
         [HttpPost("guardar")]
+        [HttpPost]
         public async Task<IActionResult> GuardarProducto([FromBody] ProductoModel model)
         {
             if (string.IsNullOrWhiteSpace(model.Nombre) || model.Precio <= 0)
-                return BadRequest("El nombre y un precio válido son requeridos.");
+                return BadRequest(new { mensaje = "El nombre y un precio válido son requeridos." });
 
             try
             {
-                using (var con = _conexion.ObtenerConexion())
-                {
-                    await con.OpenAsync();
+                var (exito, mensaje) = await _productoService.GuardarProductoAsync(model);
+                if (!exito)
+                    return BadRequest(new { mensaje });
 
-                    string codigo = string.IsNullOrWhiteSpace(model.Codigo) 
-                        ? $"PRD-{DateTime.Now.Ticks % 10000:0000}" 
-                        : model.Codigo.Trim();
-
-                    using (var check = new SqlCommand("SELECT COUNT(1) FROM Productos WHERE Codigo = @cod", con))
-                    {
-                        check.Parameters.AddWithValue("@cod", codigo);
-                        int count = (int)await check.ExecuteScalarAsync();
-                        if (count > 0) return BadRequest("Ya existe un producto con ese código.");
-                    }
-
-                    string estado = model.Stock <= 5 ? "Bajo Stock" : "Disponible";
-
-                    var query = @"
-                        INSERT INTO Productos (Codigo, Nombre, Categoria, Precio, Stock, Estado)
-                        VALUES (@cod, @nom, @cat, @precio, @stock, @estado)";
-
-                    using (var cmd = new SqlCommand(query, con))
-                    {
-                        cmd.Parameters.AddWithValue("@cod", codigo);
-                        cmd.Parameters.AddWithValue("@nom", model.Nombre.Trim());
-                        cmd.Parameters.AddWithValue("@cat", string.IsNullOrWhiteSpace(model.Categoria) ? "General" : model.Categoria.Trim());
-                        cmd.Parameters.AddWithValue("@precio", model.Precio);
-                        cmd.Parameters.AddWithValue("@stock", model.Stock);
-                        cmd.Parameters.AddWithValue("@estado", estado);
-                        await cmd.ExecuteNonQueryAsync();
-                    }
-                }
-                return Ok(new { mensaje = "Producto registrado con éxito." });
+                return Ok(new { mensaje });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { mensaje = ex.Message });
             }
         }
 
         // 4. Actualizar producto existente
         [HttpPut("actualizar/{id}")]
+        [HttpPut("{id}")]
         public async Task<IActionResult> ActualizarProducto(int id, [FromBody] ProductoModel model)
         {
             if (id <= 0 || string.IsNullOrWhiteSpace(model.Nombre))
-                return BadRequest("Datos inválidos.");
+                return BadRequest(new { mensaje = "Datos inválidos." });
 
             try
             {
-                using (var con = _conexion.ObtenerConexion())
-                {
-                    await con.OpenAsync();
-                    string estado = model.Stock <= 5 ? "Bajo Stock" : "Disponible";
+                bool actualizado = await _productoService.ActualizarProductoAsync(id, model);
+                if (!actualizado)
+                    return NotFound(new { mensaje = "Producto no encontrado." });
 
-                    var query = @"
-                        UPDATE Productos 
-                        SET Nombre = @nom, Categoria = @cat, Precio = @precio, Stock = @stock, Estado = @estado
-                        WHERE IdProducto = @id";
-
-                    using (var cmd = new SqlCommand(query, con))
-                    {
-                        cmd.Parameters.AddWithValue("@id", id);
-                        cmd.Parameters.AddWithValue("@nom", model.Nombre.Trim());
-                        cmd.Parameters.AddWithValue("@cat", model.Categoria.Trim());
-                        cmd.Parameters.AddWithValue("@precio", model.Precio);
-                        cmd.Parameters.AddWithValue("@stock", model.Stock);
-                        cmd.Parameters.AddWithValue("@estado", estado);
-                        int filas = await cmd.ExecuteNonQueryAsync();
-                        if (filas == 0) return NotFound("Producto no encontrado.");
-                    }
-                }
                 return Ok(new { mensaje = "Producto actualizado con éxito." });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { mensaje = ex.Message });
             }
         }
 
         // 5. Eliminar producto físicamente
         [HttpDelete("eliminar/{id}")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> EliminarProducto(int id)
         {
             try
             {
-                using (var con = _conexion.ObtenerConexion())
-                {
-                    await con.OpenAsync();
+                bool eliminado = await _productoService.EliminarProductoAsync(id);
+                if (!eliminado)
+                    return NotFound(new { mensaje = "Producto no encontrado." });
 
-                    // Limpiar referencias en DetalleVentas si existen
-                    var delDetalle = "DELETE FROM DetalleVentas WHERE IdProducto = @id";
-                    using (var cmdD = new SqlCommand(delDetalle, con))
-                    {
-                        cmdD.Parameters.AddWithValue("@id", id);
-                        await cmdD.ExecuteNonQueryAsync();
-                    }
-
-                    var query = "DELETE FROM Productos WHERE IdProducto = @id";
-                    using (var cmd = new SqlCommand(query, con))
-                    {
-                        cmd.Parameters.AddWithValue("@id", id);
-                        int filas = await cmd.ExecuteNonQueryAsync();
-                        if (filas == 0) return NotFound("Producto no encontrado.");
-                    }
-                }
                 return Ok(new { mensaje = "Producto eliminado con éxito." });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { mensaje = ex.Message });
             }
         }
     }
