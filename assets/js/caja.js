@@ -1,4 +1,4 @@
-const API_CAJA_URL = 'http://localhost:5099/api/caja';
+const API_CAJA_URL = 'http://192.168.1.6:5099/api/caja';
 
 const formatoUSD = (monto) => {
     return parseFloat(monto || 0).toLocaleString('en-US', {
