@@ -1,5 +1,9 @@
-const API_VENTAS_URL = 'https://pounce-chive-erratic.ngrok-free.dev/api/ventas';
-const API_CLIENTES_URL = 'https://pounce-chive-erratic.ngrok-free.dev/api/clientes';
+// Variables globales para evitar errores de ámbito y asegurar consistencia
+window.API_VENTAS_URL = window.API_VENTAS_URL || 'https://pounce-chive-erratic.ngrok-free.dev/api/Ventas';
+window.API_CLIENTES_URL = window.API_CLIENTES_URL || 'https://pounce-chive-erratic.ngrok-free.dev/api/Clientes';
+
+var API_VENTAS_URL = window.API_VENTAS_URL;
+var API_CLIENTES_URL = window.API_CLIENTES_URL;
 
 // 1. Cargar la lista de ventas desde SQL Server
 async function cargarVentas() {
@@ -7,14 +11,29 @@ async function cargarVentas() {
     if (!tbody) return;
 
     try {
-        const respuesta = await fetch(`${API_VENTAS_URL}/listar`);
+        let respuesta = await fetch(`${API_VENTAS_URL}/listar`, {
+            headers: {
+                'Accept': 'application/json',
+                'ngrok-skip-browser-warning': 'true'
+            }
+        });
+
+        if (respuesta.status === 404) {
+            respuesta = await fetch(API_VENTAS_URL, {
+                headers: {
+                    'Accept': 'application/json',
+                    'ngrok-skip-browser-warning': 'true'
+                }
+            });
+        }
+
         if (!respuesta.ok) throw new Error(`HTTP Error: ${respuesta.status}`);
 
         const ventas = await respuesta.json();
         renderizarTablaVentas(ventas);
     } catch (error) {
         console.error('Error al conectar con la API de ventas:', error);
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:red; padding:15px;">Error al cargar ventas desde la base de datos.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#ef4444; padding:15px;">Error al cargar ventas desde la base de datos.</td></tr>`;
     }
 }
 
@@ -26,16 +45,17 @@ function renderizarTablaVentas(ventas) {
     tbody.innerHTML = '';
 
     if (!Array.isArray(ventas) || ventas.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:15px;">No hay comprobantes de venta registrados.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:15px; color:#94a3b8;">No hay comprobantes de venta registrados.</td></tr>`;
         return;
     }
 
     ventas.forEach(v => {
         const idVenta = v.idVenta || v.IdVenta;
-        const codigo = v.numeroComprobante || `VNT-${idVenta}`;
-        const fecha = v.fechaVenta || '-';
-        const cliente = v.cliente || 'Consumidor Final';
-        const total = parseFloat(v.total || 0).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+        const codigo = v.numeroComprobante || v.NumeroComprobante || `VNT-${idVenta}`;
+        const fecha = v.fechaVenta || v.FechaVenta || '-';
+        const cliente = v.cliente || v.Cliente || 'Consumidor Final';
+        const totalNum = parseFloat(v.total !== undefined ? v.total : (v.Total || 0));
+        const total = totalNum.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
@@ -56,25 +76,47 @@ function renderizarTablaVentas(ventas) {
 
 // 3. Función global: VER DETALLE (Ojo)
 window.verDetalleVenta = async function(idVenta) {
-    console.log('Consultando detalle para ID:', idVenta);
     try {
-        const res = await fetch(`${API_VENTAS_URL}/detalle/${idVenta}`);
+        let res = await fetch(`${API_VENTAS_URL}/detalle/${idVenta}`, {
+            headers: {
+                'Accept': 'application/json',
+                'ngrok-skip-browser-warning': 'true'
+            }
+        });
+
+        if (res.status === 404) {
+            res = await fetch(`${API_VENTAS_URL}/${idVenta}`, {
+                headers: {
+                    'Accept': 'application/json',
+                    'ngrok-skip-browser-warning': 'true'
+                }
+            });
+        }
+
         if (!res.ok) throw new Error('No se pudo obtener el detalle de la venta.');
 
         const data = await res.json();
+        const nroComp = data.numeroComprobante || data.NumeroComprobante || `VNT-${idVenta}`;
+        const fVenta = data.fechaVenta || data.FechaVenta || '-';
+        const cliNom = data.cliente || data.Cliente || 'Consumidor Final';
+        const cliDoc = data.documento || data.Documento || '-';
+        const cliTel = data.telefono || data.Telefono || '-';
+        const cliDir = data.direccion || data.Direccion || '-';
+        const tot = parseFloat(data.total !== undefined ? data.total : (data.Total || 0)).toFixed(2);
+
         alert(
             `==============================\n` +
             `       DETALLE DE VENTA       \n` +
             `==============================\n` +
-            `N° Comprobante: ${data.numeroComprobante}\n` +
-            `Fecha:         ${data.fechaVenta}\n` +
-            `Cliente:       ${data.cliente}\n` +
-            `Doc/DNI:       ${data.documento}\n` +
-            `Teléfono:      ${data.telefono}\n` +
-            `Dirección:     ${data.direccion}\n` +
+            `N° Comprobante: ${nroComp}\n` +
+            `Fecha:          ${fVenta}\n` +
+            `Cliente:        ${cliNom}\n` +
+            `Doc/DNI:        ${cliDoc}\n` +
+            `Teléfono:       ${cliTel}\n` +
+            `Dirección:      ${cliDir}\n` +
             `------------------------------\n` +
-            `TOTAL:         $${parseFloat(data.total).toFixed(2)}\n` +
-            `Estado:        Completada\n` +
+            `TOTAL:          $${tot}\n` +
+            `Estado:         Completada\n` +
             `==============================`
         );
     } catch (err) {
@@ -85,12 +127,32 @@ window.verDetalleVenta = async function(idVenta) {
 
 // 4. Función global: IMPRIMIR (Impresora)
 window.imprimirComprobante = async function(idVenta) {
-    console.log('Imprimiendo comprobante para ID:', idVenta);
     try {
-        const res = await fetch(`${API_VENTAS_URL}/detalle/${idVenta}`);
+        let res = await fetch(`${API_VENTAS_URL}/detalle/${idVenta}`, {
+            headers: {
+                'Accept': 'application/json',
+                'ngrok-skip-browser-warning': 'true'
+            }
+        });
+
+        if (res.status === 404) {
+            res = await fetch(`${API_VENTAS_URL}/${idVenta}`, {
+                headers: {
+                    'Accept': 'application/json',
+                    'ngrok-skip-browser-warning': 'true'
+                }
+            });
+        }
+
         if (!res.ok) throw new Error('No se pudo obtener el comprobante.');
 
         const data = await res.json();
+        const nroComp = data.numeroComprobante || data.NumeroComprobante || `VNT-${idVenta}`;
+        const fVenta = data.fechaVenta || data.FechaVenta || '-';
+        const cliNom = data.cliente || data.Cliente || 'Consumidor Final';
+        const cliDoc = data.documento || data.Documento || '-';
+        const cliDir = data.direccion || data.Direccion || '-';
+        const tot = parseFloat(data.total !== undefined ? data.total : (data.Total || 0)).toFixed(2);
 
         const ventana = window.open('', '_blank', 'width=450,height=600');
         if (!ventana) {
@@ -103,7 +165,7 @@ window.imprimirComprobante = async function(idVenta) {
             <html>
             <head>
                 <meta charset="utf-8">
-                <title>Comprobante - ${data.numeroComprobante}</title>
+                <title>Comprobante - ${nroComp}</title>
                 <style>
                     body { font-family: 'Courier New', monospace; padding: 20px; font-size: 13px; color: #000; }
                     .center { text-align: center; }
@@ -117,18 +179,18 @@ window.imprimirComprobante = async function(idVenta) {
                     <h2 style="margin: 0;">SISTEMA MULTI VENTAS</h2>
                     <p style="margin: 3px 0;">RUC: 20123456789</p>
                     <p style="margin: 3px 0;"><strong>COMPROBANTE ELECTRÓNICO</strong></p>
-                    <p style="margin: 3px 0;">${data.numeroComprobante}</p>
+                    <p style="margin: 3px 0;">${nroComp}</p>
                 </div>
                 <div class="line"></div>
-                <div class="row"><span>Fecha:</span><span>${data.fechaVenta}</span></div>
-                <div class="row"><span>Cliente:</span><span>${data.cliente}</span></div>
-                <div class="row"><span>Doc/DNI:</span><span>${data.documento}</span></div>
-                <div class="row"><span>Dirección:</span><span>${data.direccion}</span></div>
+                <div class="row"><span>Fecha:</span><span>${fVenta}</span></div>
+                <div class="row"><span>Cliente:</span><span>${cliNom}</span></div>
+                <div class="row"><span>Doc/DNI:</span><span>${cliDoc}</span></div>
+                <div class="row"><span>Dirección:</span><span>${cliDir}</span></div>
                 <div class="line"></div>
                 <div class="row"><strong>DESCRIPCIÓN</strong><strong>IMPORTE</strong></div>
-                <div class="row"><span>Venta de Productos</span><span>$${parseFloat(data.total).toFixed(2)}</span></div>
+                <div class="row"><span>Venta de Productos</span><span>$${tot}</span></div>
                 <div class="line"></div>
-                <div class="row total"><span>TOTAL PAGADO:</span><span>$${parseFloat(data.total).toFixed(2)}</span></div>
+                <div class="row total"><span>TOTAL PAGADO:</span><span>$${tot}</span></div>
                 <div class="line"></div>
                 <div class="center" style="margin-top: 15px;">
                     <p>Forma de Pago: Efectivo<br>¡Gracias por su preferencia!</p>
@@ -161,11 +223,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const selectCliente = document.getElementById('selectCliente') || formVenta?.querySelector('select');
 
     if (selectCliente) {
-        fetch(`${API_CLIENTES_URL}/listar`)
-            .then(res => res.json())
-            .then(clientes => {
+        const cargarComboClientes = async () => {
+            try {
+                let res = await fetch(`${API_CLIENTES_URL}/listar`, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'ngrok-skip-browser-warning': 'true'
+                    }
+                });
+
+                if (res.status === 404) {
+                    res = await fetch(API_CLIENTES_URL, {
+                        headers: {
+                            'Accept': 'application/json',
+                            'ngrok-skip-browser-warning': 'true'
+                        }
+                    });
+                }
+
+                if (!res.ok) return;
+
+                const clientes = await res.json();
                 if (Array.isArray(clientes) && clientes.length > 0) {
-                    selectCliente.innerHTML = '';
+                    selectCliente.innerHTML = '<option value="">-- Seleccionar Cliente --</option>';
                     clientes.forEach(c => {
                         const opt = document.createElement('option');
                         opt.value = c.idCliente || c.IdCliente;
@@ -173,8 +253,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         selectCliente.appendChild(opt);
                     });
                 }
-            })
-            .catch(() => {});
+            } catch (_) {}
+        };
+
+        cargarComboClientes();
     }
 
     const cerrar = () => { if (modalVenta) modalVenta.style.display = 'none'; };
@@ -194,19 +276,50 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            let userId = 1;
+            try {
+                const sesion = JSON.parse(localStorage.getItem('usuarioSesion') || '{}');
+                if (sesion.idUsuario || sesion.IdUsuario) {
+                    userId = sesion.idUsuario || sesion.IdUsuario;
+                }
+            } catch (_) {
+                userId = 1;
+            }
+
             const nuevaVenta = {
                 idCliente: parseInt(idClienteVal) || 1,
-                idUsuario: 1,
-                total: parseFloat(totalVal)
+                IdCliente: parseInt(idClienteVal) || 1,
+                idUsuario: parseInt(userId),
+                IdUsuario: parseInt(userId),
+                total: parseFloat(totalVal),
+                Total: parseFloat(totalVal)
             };
 
             try {
-                const res = await fetch(`${API_VENTAS_URL}/guardar`, {
+                let res = await fetch(`${API_VENTAS_URL}/guardar`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'ngrok-skip-browser-warning': 'true'
+                    },
                     body: JSON.stringify(nuevaVenta)
                 });
+
+                if (res.status === 404) {
+                    res = await fetch(API_VENTAS_URL, {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'ngrok-skip-browser-warning': 'true'
+                        },
+                        body: JSON.stringify(nuevaVenta)
+                    });
+                }
+
                 if (!res.ok) throw new Error(await res.text());
+
                 alert('¡Venta registrada con éxito!');
                 formVenta.reset();
                 cerrar();
