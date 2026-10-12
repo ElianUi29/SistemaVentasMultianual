@@ -4,11 +4,10 @@ using SistemaVentasMultianual.Data;
 var builder = WebApplication.CreateBuilder(args);
 
 // 1. Inyección de dependencia de la base de datos y servicios
-builder.Services.AddScoped<Conexion>();
 builder.Services.AddScoped<UsuarioService>(); 
 builder.Services.AddScoped<CajaService>();    
-builder.Services.AddScoped<ClienteService>(); // <-- AGREGAR ESTA LÍNEA
-
+builder.Services.AddScoped<ClienteService>(); 
+builder.Services.AddScoped<CompraService>(); // <-- Agregar esta línea
 // 2. Política CORS permisiva
 builder.Services.AddCors(options =>
 {
