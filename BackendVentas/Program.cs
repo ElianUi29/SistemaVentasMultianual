@@ -5,7 +5,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 // 1. Inyección de dependencia de la base de datos y servicios
 builder.Services.AddScoped<Conexion>();
-builder.Services.AddScoped<UsuarioService>(); // Servicio con la lógica SQL de Auth/Usuarios
+builder.Services.AddScoped<UsuarioService>(); // Servicio SQL para Auth/Usuarios
+builder.Services.AddScoped<CajaService>();    // Servicio SQL para Caja
 
 // 2. Política CORS permisiva para GitHub Pages, Ngrok y móviles
 builder.Services.AddCors(options =>

@@ -1,31 +1,18 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
-using SistemaVentasMultianual.Data;
+using BackendVentas.Models;
+using BackendVentas.Services;
 
 namespace BackendVentas.Controllers
 {
-    public class AperturaModel
-    {
-        public int IdUsuario { get; set; } = 1;
-        public decimal SaldoInicial { get; set; }
-    }
-
-    public class MovimientoModel
-    {
-        public string Tipo { get; set; } = "Ingreso"; // 'Ingreso' o 'Egreso'
-        public string Concepto { get; set; } = "";
-        public decimal Monto { get; set; }
-    }
-
     [ApiController]
     [Route("api/[controller]")]
     public class CajaController : ControllerBase
     {
-        private readonly Conexion _conexion;
+        private readonly CajaService _cajaService;
 
-        public CajaController(Conexion conexion)
+        public CajaController(CajaService cajaService)
         {
-            _conexion = conexion;
+            _cajaService = cajaService;
         }
 
         // 1. Obtener el resumen de la caja activa
@@ -34,43 +21,20 @@ namespace BackendVentas.Controllers
         {
             try
             {
-                using (var con = _conexion.ObtenerConexion())
+                var resumen = await _cajaService.ObtenerResumenCajaAsync();
+                return Ok(new
                 {
-                    await con.OpenAsync();
-                    var query = @"
-                        SELECT TOP 1 
-                            IdCaja, 
-                            SaldoInicial, 
-                            IngresosEfectivo, 
-                            EgresosGastos, 
-                            TotalEfectivo, 
-                            Estado 
-                        FROM Cajas 
-                        ORDER BY IdCaja DESC";
-
-                    using (var cmd = new SqlCommand(query, con))
-                    using (var reader = await cmd.ExecuteReaderAsync())
-                    {
-                        if (await reader.ReadAsync())
-                        {
-                            return Ok(new
-                            {
-                                idCaja = Convert.ToInt32(reader["IdCaja"]),
-                                saldoInicial = Convert.ToDecimal(reader["SaldoInicial"]),
-                                ingresos = Convert.ToDecimal(reader["IngresosEfectivo"]),
-                                egresos = Convert.ToDecimal(reader["EgresosGastos"]),
-                                totalEfectivo = Convert.ToDecimal(reader["TotalEfectivo"]),
-                                estado = reader["Estado"].ToString()
-                            });
-                        }
-                    }
-                }
-
-                return Ok(new { idCaja = 0, saldoInicial = 0m, ingresos = 0m, egresos = 0m, totalEfectivo = 0m, estado = "Cerrada" });
+                    idCaja = resumen.IdCaja,
+                    saldoInicial = resumen.SaldoInicial,
+                    ingresos = resumen.Ingresos,
+                    egresos = resumen.Egresos,
+                    totalEfectivo = resumen.TotalEfectivo,
+                    estado = resumen.Estado
+                });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al obtener estado de caja: {ex.Message}");
+                return StatusCode(500, new { mensaje = $"Error al obtener estado de caja: {ex.Message}" });
             }
         }
 
@@ -78,90 +42,41 @@ namespace BackendVentas.Controllers
         [HttpPost("apertura")]
         public async Task<IActionResult> AperturaCaja([FromBody] AperturaModel model)
         {
-            if (model.SaldoInicial < 0) return BadRequest("El saldo inicial no puede ser negativo.");
+            if (model.SaldoInicial < 0)
+                return BadRequest(new { mensaje = "El saldo inicial no puede ser negativo." });
 
             try
             {
-                using (var con = _conexion.ObtenerConexion())
-                {
-                    await con.OpenAsync();
-                    // Verificar si ya hay una abierta
-                    var checkQuery = "SELECT COUNT(1) FROM Cajas WHERE Estado = 'Abierta'";
-                    using (var checkCmd = new SqlCommand(checkQuery, con))
-                    {
-                        int abiertas = (int)await checkCmd.ExecuteScalarAsync();
-                        if (abiertas > 0) return BadRequest("Ya existe una caja abierta. Primero realiza el corte.");
-                    }
+                var resultado = await _cajaService.AperturaCajaAsync(model);
+                if (!resultado.Exito)
+                    return BadRequest(new { mensaje = resultado.Mensaje });
 
-                    var insertQuery = @"
-                        INSERT INTO Cajas (IdUsuario, FechaApertura, SaldoInicial, IngresosEfectivo, EgresosGastos, TotalEfectivo, Estado)
-                        VALUES (@idUsu, GETDATE(), @monto, 0.00, 0.00, @monto, 'Abierta')";
-
-                    using (var cmd = new SqlCommand(insertQuery, con))
-                    {
-                        cmd.Parameters.AddWithValue("@idUsu", model.IdUsuario > 0 ? model.IdUsuario : 1);
-                        cmd.Parameters.AddWithValue("@monto", model.SaldoInicial);
-                        await cmd.ExecuteNonQueryAsync();
-                    }
-                }
-                return Ok(new { mensaje = "Caja abierta con éxito." });
+                return Ok(new { mensaje = resultado.Mensaje });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { mensaje = ex.Message });
             }
         }
 
-        // 3. Registrar un Movimiento (Ingreso o Egreso) y actualizar la caja automáticamente
+        // 3. Registrar un Movimiento (Ingreso o Egreso)
         [HttpPost("movimiento")]
         public async Task<IActionResult> RegistrarMovimiento([FromBody] MovimientoModel model)
         {
             if (model.Monto <= 0 || string.IsNullOrWhiteSpace(model.Concepto))
-                return BadRequest("Concepto y monto válidos son requeridos.");
+                return BadRequest(new { mensaje = "Concepto y monto válidos son requeridos." });
 
             try
             {
-                using (var con = _conexion.ObtenerConexion())
-                {
-                    await con.OpenAsync();
+                var resultado = await _cajaService.RegistrarMovimientoAsync(model);
+                if (!resultado.Exito)
+                    return BadRequest(new { mensaje = resultado.Mensaje });
 
-                    // Buscar caja abierta
-                    int idCaja = 0;
-                    var findCmd = new SqlCommand("SELECT TOP 1 IdCaja FROM Cajas WHERE Estado = 'Abierta' ORDER BY IdCaja DESC", con);
-                    var result = await findCmd.ExecuteScalarAsync();
-                    if (result == null) return BadRequest("No hay ninguna caja abierta actualmente.");
-                    idCaja = (int)result;
-
-                    // 1. Insertar en MovimientosCaja
-                    var insMov = @"
-                        INSERT INTO MovimientosCaja (IdCaja, Tipo, Concepto, Monto, Fecha)
-                        VALUES (@idCaja, @tipo, @concepto, @monto, GETDATE())";
-                    using (var cmdMov = new SqlCommand(insMov, con))
-                    {
-                        cmdMov.Parameters.AddWithValue("@idCaja", idCaja);
-                        cmdMov.Parameters.AddWithValue("@tipo", model.Tipo);
-                        cmdMov.Parameters.AddWithValue("@concepto", model.Concepto);
-                        cmdMov.Parameters.AddWithValue("@monto", model.Monto);
-                        await cmdMov.ExecuteNonQueryAsync();
-                    }
-
-                    // 2. Actualizar el acumulado en Cajas
-                    string updateSql = model.Tipo == "Ingreso"
-                        ? "UPDATE Cajas SET IngresosEfectivo = IngresosEfectivo + @monto, TotalEfectivo = TotalEfectivo + @monto WHERE IdCaja = @idCaja"
-                        : "UPDATE Cajas SET EgresosGastos = EgresosGastos + @monto, TotalEfectivo = TotalEfectivo - @monto WHERE IdCaja = @idCaja";
-
-                    using (var cmdUpd = new SqlCommand(updateSql, con))
-                    {
-                        cmdUpd.Parameters.AddWithValue("@monto", model.Monto);
-                        cmdUpd.Parameters.AddWithValue("@idCaja", idCaja);
-                        await cmdUpd.ExecuteNonQueryAsync();
-                    }
-                }
-                return Ok(new { mensaje = "Movimiento registrado con éxito." });
+                return Ok(new { mensaje = resultado.Mensaje });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { mensaje = ex.Message });
             }
         }
 
@@ -169,45 +84,14 @@ namespace BackendVentas.Controllers
         [HttpGet("movimientos")]
         public async Task<IActionResult> ListarMovimientos()
         {
-            var lista = new List<object>();
             try
             {
-                using (var con = _conexion.ObtenerConexion())
-                {
-                    await con.OpenAsync();
-                    var query = @"
-                        SELECT TOP 30
-                            m.IdMovimiento,
-                            m.Tipo,
-                            m.Concepto,
-                            m.Monto,
-                            m.Fecha
-                        FROM MovimientosCaja m
-                        INNER JOIN Cajas c ON m.IdCaja = c.IdCaja
-                        WHERE c.Estado = 'Abierta'
-                        ORDER BY m.IdMovimiento DESC";
-
-                    using (var cmd = new SqlCommand(query, con))
-                    using (var reader = await cmd.ExecuteReaderAsync())
-                    {
-                        while (await reader.ReadAsync())
-                        {
-                            lista.Add(new
-                            {
-                                idMovimiento = Convert.ToInt32(reader["IdMovimiento"]),
-                                tipo = reader["Tipo"].ToString(),
-                                concepto = reader["Concepto"].ToString(),
-                                monto = Convert.ToDecimal(reader["Monto"]),
-                                fecha = Convert.ToDateTime(reader["Fecha"]).ToString("yyyy-MM-dd HH:mm")
-                            });
-                        }
-                    }
-                }
-                return Ok(lista);
+                var movimientos = await _cajaService.ListarMovimientosAsync();
+                return Ok(movimientos);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { mensaje = ex.Message });
             }
         }
 
@@ -217,18 +101,15 @@ namespace BackendVentas.Controllers
         {
             try
             {
-                using (var con = _conexion.ObtenerConexion())
-                {
-                    await con.OpenAsync();
-                    var cmd = new SqlCommand("UPDATE TOP (1) Cajas SET Estado = 'Cerrada', FechaCierre = GETDATE() WHERE Estado = 'Abierta'", con);
-                    int filas = await cmd.ExecuteNonQueryAsync();
-                    if (filas == 0) return BadRequest("No hay caja abierta para cerrar.");
-                }
-                return Ok(new { mensaje = "Corte efectuado con éxito." });
+                var resultado = await _cajaService.CorteCajaAsync();
+                if (!resultado.Exito)
+                    return BadRequest(new { mensaje = resultado.Mensaje });
+
+                return Ok(new { mensaje = resultado.Mensaje });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new { mensaje = ex.Message });
             }
         }
     }
