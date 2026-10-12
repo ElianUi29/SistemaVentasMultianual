@@ -1,4 +1,6 @@
-const API_AUTH_URL = 'https://pounce-chive-erratic.ngrok-free.dev/api/Auth';
+// Variable global para evitar errores de 'not defined' y compartir con otros módulos
+window.API_AUTH_URL = window.API_AUTH_URL || 'https://pounce-chive-erratic.ngrok-free.dev/api/Auth';
+var API_AUTH_URL = window.API_AUTH_URL;
 
 document.addEventListener('DOMContentLoaded', () => {
     // Si ya existe una sesión activa, entra al Dashboard
@@ -31,10 +33,10 @@ document.addEventListener('DOMContentLoaded', () => {
         btnIrRegistro.addEventListener('click', (e) => {
             e.preventDefault();
             ocultarAlerta();
-            formLogin.style.display = 'none';
-            formRegistro.style.display = 'block';
-            tituloAuth.textContent = 'Crear Usuario';
-            subtituloAuth.textContent = 'Registra un nuevo usuario en SQL Server';
+            if (formLogin) formLogin.style.display = 'none';
+            if (formRegistro) formRegistro.style.display = 'block';
+            if (tituloAuth) tituloAuth.textContent = 'Crear Usuario';
+            if (subtituloAuth) subtituloAuth.textContent = 'Registra un nuevo usuario en SQL Server';
         });
     }
 
@@ -43,10 +45,10 @@ document.addEventListener('DOMContentLoaded', () => {
         btnIrLogin.addEventListener('click', (e) => {
             e.preventDefault();
             ocultarAlerta();
-            formRegistro.style.display = 'none';
-            formLogin.style.display = 'block';
-            tituloAuth.textContent = 'Iniciar Sesión';
-            subtituloAuth.textContent = 'Ingresa a tu cuenta de MultiVentas';
+            if (formRegistro) formRegistro.style.display = 'none';
+            if (formLogin) formLogin.style.display = 'block';
+            if (tituloAuth) tituloAuth.textContent = 'Iniciar Sesión';
+            if (subtituloAuth) subtituloAuth.textContent = 'Ingresa a tu cuenta de MultiVentas';
         });
     }
 
@@ -64,17 +66,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            const credenciales = {
+                correo: correo,
+                clave: clave,
+                Correo: correo,
+                Clave: clave
+            };
+
             try {
                 const res = await fetch(`${API_AUTH_URL}/login`, {
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json',
+                        'Accept': 'application/json',
                         'ngrok-skip-browser-warning': 'true'
                     },
-                    body: JSON.stringify({ correo, clave })
+                    body: JSON.stringify(credenciales)
                 });
 
-                const data = await res.json();
+                let data;
+                const contentType = res.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    data = await res.json();
+                } else {
+                    const text = await res.text();
+                    data = { mensaje: text };
+                }
 
                 if (!res.ok) {
                     mostrarAlerta(data.mensaje || 'Error al iniciar sesión.');
@@ -82,7 +99,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 // Guardar usuario autenticado
-                localStorage.setItem('usuarioSesion', JSON.stringify(data.usuario));
+                const usuario = data.usuario || data.Usuario || data;
+                localStorage.setItem('usuarioSesion', JSON.stringify(usuario));
 
                 mostrarAlerta('¡Acceso concedido! Entrando...', true);
                 setTimeout(() => {
@@ -105,7 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const nombre = document.getElementById('regNombre')?.value.trim();
             const correo = document.getElementById('regCorreo')?.value.trim();
             const clave = document.getElementById('regClave')?.value.trim();
-            const rol = document.getElementById('regRol')?.value;
+            const rol = document.getElementById('regRol')?.value || 'Vendedor';
 
             if (!nombre || !correo || !clave) {
                 mostrarAlerta('Completa todos los campos obligatorios.');
@@ -116,7 +134,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 nombreCompleto: nombre,
                 correo: correo,
                 clave: clave,
-                rol: rol
+                rol: rol,
+                NombreCompleto: nombre,
+                Correo: correo,
+                Clave: clave,
+                Rol: rol
             };
 
             try {
@@ -124,26 +146,35 @@ document.addEventListener('DOMContentLoaded', () => {
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json',
+                        'Accept': 'application/json',
                         'ngrok-skip-browser-warning': 'true'
                     },
                     body: JSON.stringify(nuevoUsuario)
                 });
 
-                const data = await res.json();
+                let data;
+                const contentType = res.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    data = await res.json();
+                } else {
+                    const text = await res.text();
+                    data = { mensaje: text };
+                }
 
                 if (!res.ok) {
                     mostrarAlerta(data.mensaje || 'Error al registrar el usuario.');
                     return;
                 }
 
-                mostrarAlerta(data.mensaje, true);
+                mostrarAlerta(data.mensaje || 'Usuario registrado exitosamente.', true);
                 formRegistro.reset();
 
-                // Regresar a la vista de login y precargar el correo registrado
                 setTimeout(() => {
-                    btnIrLogin.click();
-                    document.getElementById('loginCorreo').value = correo;
-                    document.getElementById('loginClave').focus();
+                    if (btnIrLogin) btnIrLogin.click();
+                    const inputLoginCorreo = document.getElementById('loginCorreo');
+                    const inputLoginClave = document.getElementById('loginClave');
+                    if (inputLoginCorreo) inputLoginCorreo.value = correo;
+                    if (inputLoginClave) inputLoginClave.focus();
                     mostrarAlerta('¡Usuario registrado en SQL Server! Ahora ingresa tu contraseña.', true);
                 }, 1500);
 
